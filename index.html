@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Echoes - Full Custom Prototype</title>
+    <title>Project Echoes - APS Prototype</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -63,7 +63,7 @@
 <div id="game-container">
     <div id="config-screen">
         <h2>🎨 게임 스탯 커스텀 설정</h2>
-        <p style="font-size: 12px; color: #a4b0be; margin-bottom: 15px;">물감의 공격력/공속 및 적들의 체력(HP)을 설정하고 게임을 시작하세요!</p>
+        <p style="font-size: 12px; color: #a4b0be; margin-bottom: 15px;">물감의 공격력 및 <b>초당 공격 횟수(APS)</b>, 적들의 체력(HP)을 설정하고 시작하세요!</p>
         
         <h4 style="margin: 5px 0; color: #f1c40f; align-self: flex-start; width: 100%; max-width: 700px;">물감 설정</h4>
         <div class="config-grid" id="color-inputs"></div>
@@ -101,12 +101,12 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let COLOR_TYPES = {
-    RED: { name: '빨강', color: '#ff4757', damage: 30, cooldown: 25, range: 40, type: 'small_arc' },
-    ORANGE: { name: '주황', color: '#e67e22', damage: 20, cooldown: 35, range: 35, type: 'growing' },
-    YELLOW: { name: '노랑', color: '#f1c40f', damage: 10, cooldown: 15, range: 50, type: 'front_circle', slow: true },
-    GREEN: { name: '초록', color: '#2ecc71', damage: 45, cooldown: 45, range: 150, type: 'vine', knockback: true },
-    BLUE: { name: '파랑', color: '#3498db', damage: 15, cooldown: 25, range: 55, type: 'arc', multiHit: true },
-    PURPLE: { name: '보라', color: '#9b59b6', damage: 35, cooldown: 40, range: 85, type: 'line', poison: true }
+    RED: { name: '빨강', color: '#ff4757', damage: 30, aps: 2.4, range: 40, type: 'small_arc' },
+    ORANGE: { name: '주황', color: '#e67e22', damage: 20, aps: 1.7, range: 35, type: 'growing' },
+    YELLOW: { name: '노랑', color: '#f1c40f', damage: 10, aps: 4.0, range: 50, type: 'front_circle', slow: true },
+    GREEN: { name: '초록', color: '#2ecc71', damage: 45, aps: 1.3, range: 150, type: 'vine', knockback: true },
+    BLUE: { name: '파랑', color: '#3498db', damage: 15, aps: 2.4, range: 55, type: 'arc', multiHit: true },
+    PURPLE: { name: '보라', color: '#9b59b6', damage: 35, aps: 1.5, range: 85, type: 'line', poison: true }
 };
 
 let ENEMY_TYPES = {
@@ -115,7 +115,7 @@ let ENEMY_TYPES = {
     TANK: { name: '탱크', radius: 24, hp: 120, speed: 0.8, color: '#8e44ad', type: 'tank' }
 };
 
-// 설정 UI 동적 생성
+// 설정 UI 동적 생성 (APS 기준)
 const colorContainer = document.getElementById('color-inputs');
 for (let key in COLOR_TYPES) {
     let item = COLOR_TYPES[key];
@@ -123,7 +123,7 @@ for (let key in COLOR_TYPES) {
         <div class="config-item" style="border-left: 4px solid ${item.color};">
             <label>${item.name} 물감</label>
             공격력: <input type="number" id="dmg_${key}" value="${item.damage}" min="1" max="500">
-            공속(쿨타임): <input type="number" id="cd_${key}" value="${item.cooldown}" min="2" max="100">
+            초당 공격 횟수(APS): <input type="number" id="aps_${key}" value="${item.aps}" min="0.1" max="20" step="0.1">
         </div>
     `;
 }
@@ -144,7 +144,9 @@ let gameStarted = false;
 function startGame() {
     for (let key in COLOR_TYPES) {
         COLOR_TYPES[key].damage = parseInt(document.getElementById(`dmg_${key}`).value) || 10;
-        COLOR_TYPES[key].cooldown = parseInt(document.getElementById(`cd_${key}`).value) || 20;
+        let apsVal = parseFloat(document.getElementById(`aps_${key}`).value) || 1.0;
+        // APS를 프레임 쿨타임으로 환산 (60프레임 / APS)
+        COLOR_TYPES[key].cooldown = Math.max(2, Math.round(60 / apsVal));
     }
     for (let key in ENEMY_TYPES) {
         ENEMY_TYPES[key].hp = parseInt(document.getElementById(`ehp_${key}`).value) || 40;
