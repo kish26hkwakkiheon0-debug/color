@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Echoes - Custom Prototype</title>
+    <title>Project Echoes - Damage Text Prototype</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -16,7 +16,6 @@
         #game-container { position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; }
         canvas { display: block; background-color: #2d2b38; }
         
-        /* 설정 화면 스타일 */
         #config-screen {
             position: absolute; top: 0; left: 0; width: 800px; height: 600px;
             background: rgba(26, 26, 36, 0.95); z-index: 10;
@@ -62,13 +61,10 @@
 <body>
 
 <div id="game-container">
-    <!-- 게임 시작 전 스탯 설정 화면 -->
     <div id="config-screen">
         <h2>🎨 물감 스탯 커스텀 설정</h2>
-        <p style="font-size: 13px; color: #a4b0be; margin-bottom: 20px;">각 물감의 공격력과 공격 속도(쿨타임, 낮을수록 빠름)를 설정하세요!</p>
-        <div class="config-grid" id="config-inputs">
-            <!-- 자바스크립트로 동적 생성 -->
-        </div>
+        <p style="font-size: 13px; color: #a4b0be; margin-bottom: 20px;">각 물감의 공격력과 공격 속도(쿨타임)를 설정하세요!</p>
+        <div class="config-grid" id="config-inputs"></div>
         <button id="start-btn" onclick="startGame()">게임 시작!</button>
     </div>
 
@@ -86,9 +82,9 @@
     </div>
 
     <div id="controls-info">
-        🎮 <b>조작법 & 색상 시스템</b><br>
+        🎮 <b>조작법 & 데미지 표시</b><br>
         - <b>이동:</b> W, A, S, D | <b>대시:</b> Space<br>
-        - <b>일반 공격:</b> 마우스 좌클릭 (초록색은 가장 가까운 적 자동 덩굴 공격)<br>
+        - <b>일반 공격:</b> 마우스 좌클릭 (적에게 데미지와 남은 체력 표출)<br>
         - <b>특수 스킬:</b> <b>E 키</b> (에너지 소모)<br>
         - <b>색상 교체:</b> 1(빨강), 2(주황), 3(노랑), 4(초록), 5(파랑), 6(보라)
     </div>
@@ -98,7 +94,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// 기본 물감 설정 데이터
 let COLOR_TYPES = {
     RED: { name: '빨강', color: '#ff4757', damage: 30, cooldown: 25, range: 40, type: 'small_arc' },
     ORANGE: { name: '주황', color: '#e67e22', damage: 20, cooldown: 35, range: 35, type: 'growing' },
@@ -108,7 +103,6 @@ let COLOR_TYPES = {
     PURPLE: { name: '보라', color: '#9b59b6', damage: 35, cooldown: 40, range: 85, type: 'line', poison: true }
 };
 
-// 설정 화면 인풋박스 동적 생성
 const configContainer = document.getElementById('config-inputs');
 for (let key in COLOR_TYPES) {
     let item = COLOR_TYPES[key];
@@ -124,7 +118,6 @@ for (let key in COLOR_TYPES) {
 let gameStarted = false;
 
 function startGame() {
-    // 사용자가 입력한 값으로 스탯 갱신
     for (let key in COLOR_TYPES) {
         COLOR_TYPES[key].damage = parseInt(document.getElementById(`dmg_${key}`).value) || 10;
         COLOR_TYPES[key].cooldown = parseInt(document.getElementById(`cd_${key}`).value) || 20;
@@ -151,6 +144,7 @@ const player = {
 
 const attackEffects = [];
 const projectiles = [];
+const damageTexts = []; // 데미지 표출 텍스트 배열
 let enemies = [];
 let gameTime = 0;
 let respawnTimer = 0;
@@ -228,11 +222,14 @@ function triggerSkill() {
     if (player.currentColor === COLOR_TYPES.RED) {
         attackEffects.push({ x: player.x, y: player.y, angle: angle, color: '#ff4757', range: 120, life: 15, maxLife: 15, type: 'wide_burn' });
         enemies.forEach(e => {
-            if (Math.hypot(e.x - player.x, e.y - player.y) <= 120 + e.radius) { e.hp -= 50; e.burnTimer = 180; }
+            if (Math.hypot(e.x - player.x, e.y - player.y) <= 120 + e.radius) {
+                dealDamage(e, 50);
+                e.burnTimer = 180;
+            }
         });
     } else if (player.currentColor === COLOR_TYPES.ORANGE) {
         player.x += Math.cos(angle) * 120; player.y += Math.sin(angle) * 120;
-        enemies.forEach(e => { if (Math.hypot(e.x - player.x, e.y - player.y) < e.radius + 20) e.hp -= 40; });
+        enemies.forEach(e => { if (Math.hypot(e.x - player.x, e.y - player.y) < e.radius + 20) dealDamage(e, 40); });
     } else if (player.currentColor === COLOR_TYPES.YELLOW) {
         player.hp = Math.min(player.maxHp, player.hp + 25);
         player.speedBoostTimer = 180;
@@ -245,6 +242,18 @@ function triggerSkill() {
             projectiles.push({ x: player.x, y: player.y, vx: Math.cos(angle+offset)*5, vy: Math.sin(angle+offset)*5, type: 'poison_bullet', damage: 25 });
         });
     }
+}
+
+// 데미지 처리 및 플로팅 텍스트 생성 함수
+function dealDamage(enemy, amount) {
+    enemy.hp -= amount;
+    damageTexts.push({
+        x: enemy.x,
+        y: enemy.y - enemy.radius - 8,
+        text: `-${amount} (HP: ${Math.max(0, Math.round(enemy.hp))})`,
+        life: 40,
+        maxLife: 40
+    });
 }
 
 function performAttack() {
@@ -266,7 +275,6 @@ function performAttack() {
         player.orangeCombo = 0;
     }
 
-    // 초록색 특수 로직: 가장 가까운 적 한 명에게 덩굴 타격
     if (attackType === 'vine') {
         let closestEnemy = null;
         let minDist = Infinity;
@@ -308,7 +316,9 @@ function performAttack() {
             if (dist <= currentRange + enemy.radius && angleDiff < Math.PI / 3) {
                 applyDamageAndEffect(enemy, player.currentColor);
                 if (player.currentColor.multiHit) {
-                    setTimeout(() => { enemy.hp -= 10; }, 150);
+                    setTimeout(() => { 
+                        if (enemy.hp > 0) dealDamage(enemy, 10); 
+                    }, 150);
                 }
             }
         }
@@ -316,7 +326,8 @@ function performAttack() {
 }
 
 function applyDamageAndEffect(enemy, colorData, multiplier = 1) {
-    enemy.hp -= colorData.damage * multiplier;
+    const actualDmg = Math.round(colorData.damage * multiplier);
+    dealDamage(enemy, actualDmg);
     player.energy = Math.min(player.maxEnergy, player.energy + 5);
 
     if (colorData.slow) enemy.slowTimer = 60;
@@ -364,12 +375,20 @@ function update() {
         if (player.invincibleTimer <= 0) player.invincible = false;
     }
 
+    // 데미지 텍스트 애니메이션 업데이트
+    for (let i = damageTexts.length - 1; i >= 0; i--) {
+        let dt = damageTexts[i];
+        dt.y -= 0.6; // 위로 서서히 떠오름
+        dt.life--;
+        if (dt.life <= 0) damageTexts.splice(i, 1);
+    }
+
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
         p.x += p.vx; p.y += p.vy;
         enemies.forEach(e => {
             if (Math.hypot(e.x - p.x, e.y - p.y) < e.radius + 8) {
-                e.hp -= p.damage;
+                dealDamage(e, p.damage);
                 if (p.type === 'poison_bullet') e.poisonTimer = 180;
                 projectiles.splice(i, 1);
             }
@@ -381,8 +400,8 @@ function update() {
         const enemy = enemies[i];
         if (enemy.hp <= 0) { enemies.splice(i, 1); continue; }
 
-        if (enemy.burnTimer > 0) { enemy.burnTimer--; if (gameTime % 30 === 0) enemy.hp -= 8; }
-        if (enemy.poisonTimer > 0) { enemy.poisonTimer--; if (gameTime % 30 === 0) enemy.hp -= 6; }
+        if (enemy.burnTimer > 0) { enemy.burnTimer--; if (gameTime % 30 === 0) dealDamage(enemy, 8); }
+        if (enemy.poisonTimer > 0) { enemy.poisonTimer--; if (gameTime % 30 === 0) dealDamage(enemy, 6); }
 
         let speed = enemy.speed;
         if (enemy.slowTimer > 0) { speed *= 0.4; enemy.slowTimer--; }
@@ -437,7 +456,6 @@ function draw() {
         const p = attackEffects[i];
         ctx.save(); ctx.beginPath();
         if (p.type === 'vine_effect') {
-            // 초록색 덩굴 이펙트 선 긋기
             ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 3;
             ctx.moveTo(p.x, p.y); ctx.lineTo(p.targetX, p.targetY); ctx.stroke();
         } else if (p.type === 'line') {
@@ -455,6 +473,20 @@ function draw() {
         ctx.restore();
         p.life--; if (p.life <= 0) attackEffects.splice(i, 1);
     }
+
+    // 데미지 텍스트 렌더링
+    damageTexts.forEach(dt => {
+        ctx.save();
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = '#ff4757';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = dt.life / dt.maxLife;
+        ctx.textAlign = 'center';
+        ctx.strokeText(dt.text, dt.x, dt.y);
+        ctx.fillText(dt.text, dt.x, dt.y);
+        ctx.restore();
+    });
 
     if (gameStarted) {
         ctx.save();
