@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Echoes - Damage Text Prototype</title>
+    <title>Project Echoes - Full Custom Prototype</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -18,24 +18,24 @@
         
         #config-screen {
             position: absolute; top: 0; left: 0; width: 800px; height: 600px;
-            background: rgba(26, 26, 36, 0.95); z-index: 10;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px;
+            background: rgba(26, 26, 36, 0.98); z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 20px; overflow-y: auto;
         }
         .config-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; width: 100%; max-width: 600px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; width: 100%; max-width: 700px;
         }
         .config-item {
-            background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1); font-size: 12px;
         }
-        .config-item label { display: block; font-size: 13px; margin-bottom: 5px; font-weight: bold; }
-        .config-item input { width: 100%; margin-bottom: 5px; }
+        .config-item label { display: block; font-size: 12px; margin-bottom: 3px; font-weight: bold; }
+        .config-item input { width: 100%; margin-bottom: 2px; padding: 3px; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; }
         
         #start-btn {
-            background: #2ed573; color: white; border: none; padding: 12px 30px;
-            font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer;
-            transition: background 0.2s;
+            background: #2ed573; color: white; border: none; padding: 10px 25px;
+            font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer;
+            transition: background 0.2s; margin-bottom: 20px;
         }
         #start-btn:hover { background: #26af5f; }
 
@@ -62,9 +62,15 @@
 
 <div id="game-container">
     <div id="config-screen">
-        <h2>🎨 물감 스탯 커스텀 설정</h2>
-        <p style="font-size: 13px; color: #a4b0be; margin-bottom: 20px;">각 물감의 공격력과 공격 속도(쿨타임)를 설정하세요!</p>
-        <div class="config-grid" id="config-inputs"></div>
+        <h2>🎨 게임 스탯 커스텀 설정</h2>
+        <p style="font-size: 12px; color: #a4b0be; margin-bottom: 15px;">물감의 공격력/공속 및 적들의 체력(HP)을 설정하고 게임을 시작하세요!</p>
+        
+        <h4 style="margin: 5px 0; color: #f1c40f; align-self: flex-start; width: 100%; max-width: 700px;">물감 설정</h4>
+        <div class="config-grid" id="color-inputs"></div>
+
+        <h4 style="margin: 5px 0; color: #ff4757; align-self: flex-start; width: 100%; max-width: 700px;">적 체력 설정</h4>
+        <div class="config-grid" id="enemy-inputs"></div>
+
         <button id="start-btn" onclick="startGame()">게임 시작!</button>
     </div>
 
@@ -84,7 +90,7 @@
     <div id="controls-info">
         🎮 <b>조작법 & 데미지 표시</b><br>
         - <b>이동:</b> W, A, S, D | <b>대시:</b> Space<br>
-        - <b>일반 공격:</b> 마우스 좌클릭 (적에게 데미지와 남은 체력 표출)<br>
+        - <b>일반 공격:</b> 마우스 좌클릭 (데미지 & 남은 HP 표시)<br>
         - <b>특수 스킬:</b> <b>E 키</b> (에너지 소모)<br>
         - <b>색상 교체:</b> 1(빨강), 2(주황), 3(노랑), 4(초록), 5(파랑), 6(보라)
     </div>
@@ -103,14 +109,32 @@ let COLOR_TYPES = {
     PURPLE: { name: '보라', color: '#9b59b6', damage: 35, cooldown: 40, range: 85, type: 'line', poison: true }
 };
 
-const configContainer = document.getElementById('config-inputs');
+let ENEMY_TYPES = {
+    SLIME: { name: '슬라임', radius: 16, hp: 40, speed: 1.8, color: '#2ed573', type: 'slime' },
+    RUNNER: { name: '러너', radius: 12, hp: 25, speed: 3.0, color: '#f39c12', type: 'runner' },
+    TANK: { name: '탱크', radius: 24, hp: 120, speed: 0.8, color: '#8e44ad', type: 'tank' }
+};
+
+// 설정 UI 동적 생성
+const colorContainer = document.getElementById('color-inputs');
 for (let key in COLOR_TYPES) {
     let item = COLOR_TYPES[key];
-    configContainer.innerHTML += `
+    colorContainer.innerHTML += `
         <div class="config-item" style="border-left: 4px solid ${item.color};">
             <label>${item.name} 물감</label>
-            공격력: <input type="number" id="dmg_${key}" value="${item.damage}" min="1" max="200">
-            공속(쿨타임): <input type="number" id="cd_${key}" value="${item.cooldown}" min="5" max="100">
+            공격력: <input type="number" id="dmg_${key}" value="${item.damage}" min="1" max="500">
+            공속(쿨타임): <input type="number" id="cd_${key}" value="${item.cooldown}" min="2" max="100">
+        </div>
+    `;
+}
+
+const enemyContainer = document.getElementById('enemy-inputs');
+for (let key in ENEMY_TYPES) {
+    let item = ENEMY_TYPES[key];
+    enemyContainer.innerHTML += `
+        <div class="config-item" style="border-left: 4px solid ${item.color};">
+            <label>${item.name}</label>
+            체력(HP): <input type="number" id="ehp_${key}" value="${item.hp}" min="5" max="2000">
         </div>
     `;
 }
@@ -122,10 +146,14 @@ function startGame() {
         COLOR_TYPES[key].damage = parseInt(document.getElementById(`dmg_${key}`).value) || 10;
         COLOR_TYPES[key].cooldown = parseInt(document.getElementById(`cd_${key}`).value) || 20;
     }
+    for (let key in ENEMY_TYPES) {
+        ENEMY_TYPES[key].hp = parseInt(document.getElementById(`ehp_${key}`).value) || 40;
+    }
     document.getElementById('config-screen').style.display = 'none';
     document.getElementById('ui-layer').style.display = 'flex';
     document.getElementById('controls-info').style.display = 'block';
     gameStarted = true;
+    spawnWave();
 }
 
 const keys = {};
@@ -144,16 +172,10 @@ const player = {
 
 const attackEffects = [];
 const projectiles = [];
-const damageTexts = []; // 데미지 표출 텍스트 배열
+const damageTexts = [];
 let enemies = [];
 let gameTime = 0;
 let respawnTimer = 0;
-
-const ENEMY_TYPES = {
-    SLIME: { radius: 16, hp: 40, speed: 1.8, color: '#2ed573', type: 'slime' },
-    RUNNER: { radius: 12, hp: 25, speed: 3.0, color: '#f39c12', type: 'runner' },
-    TANK: { radius: 24, hp: 120, speed: 0.8, color: '#8e44ad', type: 'tank' }
-};
 
 function spawnWave() {
     enemies = [];
@@ -173,11 +195,9 @@ function createRandomEnemy(proto) {
     enemies.push({
         x: x, y: y, radius: proto.radius, hp: proto.hp, maxHp: proto.hp,
         speed: proto.speed, color: proto.color, type: proto.type,
-        slowTimer: 0, burnTimer: 0, burnDamageTimer: 0, poisonTimer: 0, poisonDamageTimer: 0
+        slowTimer: 0, burnTimer: 0, poisonTimer: 0
     });
 }
-
-spawnWave();
 
 window.addEventListener('keydown', e => {
     if (!gameStarted) return;
@@ -244,7 +264,6 @@ function triggerSkill() {
     }
 }
 
-// 데미지 처리 및 플로팅 텍스트 생성 함수
 function dealDamage(enemy, amount) {
     enemy.hp -= amount;
     damageTexts.push({
@@ -375,10 +394,9 @@ function update() {
         if (player.invincibleTimer <= 0) player.invincible = false;
     }
 
-    // 데미지 텍스트 애니메이션 업데이트
     for (let i = damageTexts.length - 1; i >= 0; i--) {
         let dt = damageTexts[i];
-        dt.y -= 0.6; // 위로 서서히 떠오름
+        dt.y -= 0.6;
         dt.life--;
         if (dt.life <= 0) damageTexts.splice(i, 1);
     }
@@ -474,7 +492,6 @@ function draw() {
         p.life--; if (p.life <= 0) attackEffects.splice(i, 1);
     }
 
-    // 데미지 텍스트 렌더링
     damageTexts.forEach(dt => {
         ctx.save();
         ctx.font = 'bold 12px sans-serif';
