@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Echoes - Prototype v2</title>
+    <title>Project Echoes - Prototype v3</title>
     <style>
         * {
             box-sizing: border-box;
@@ -83,16 +83,18 @@
             웨이브 리스폰 대기 중...
         </div>
         <div id="color-status" style="margin-top: 2px; font-weight: bold; color: #ff4757;">
-            현재 물감: Red [단축키 1, 2, 3]
+            현재 물감: Red [단축키 1~5]
         </div>
     </div>
 
     <div id="controls-info">
-        🎮 <b>조작법</b><br>
-        - <b>이동:</b> W, A, S, D<br>
-        - <b>일반 공격:</b> 마우스 좌클릭 (붓 휘두르기 모션)<br>
-        - <b>대시/회피:</b> Space<br>
-        - <b>물감 변경:</b> 숫자키 1(Red), 2(Yellow), 3(Blue)
+        🎮 <b>조작법 & 신규 시스템</b><br>
+        - <b>이동:</b> W, A, S, D | <b>대시:</b> Space<br>
+        - <b>일반 공격:</b> 마우스 좌클릭 (연타 불가, 묵직한 모션 적용)<br>
+        - <b>물감 변경:</b><br>
+        &nbsp;&nbsp;1(Red: 근접 강타), 2(Yellow: 슬로우 범위), 3(Blue: 표준)<br>
+        &nbsp;&nbsp;4(Purple: 직선 찌르기 + 독 데미지)<br>
+        &nbsp;&nbsp;5(Orange: 반복 시 범위 커지다 마지막 원형 폭발)
     </div>
 </div>
 
@@ -101,9 +103,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const COLOR_TYPES = {
-    RED: { name: 'Red', color: '#ff4757', damage: 35, range: 45, energyCost: 10, desc: '공격력↑ 사거리↓' },
-    YELLOW: { name: 'Yellow', color: '#ffa502', damage: 15, range: 85, slowEffect: true, energyCost: 15, desc: '사거리↑ 명중시 슬로우' },
-    BLUE: { name: 'Blue', color: '#1e90ff', damage: 20, range: 60, energyCost: 5, desc: '균형 잡힌 물감' }
+    RED: { name: 'Red', color: '#ff4757', damage: 35, range: 50, type: 'arc' },
+    YELLOW: { name: 'Yellow', color: '#ffa502', damage: 15, range: 90, slowEffect: true, type: 'arc' },
+    BLUE: { name: 'Blue', color: '#1e90ff', damage: 20, range: 65, type: 'arc' },
+    PURPLE: { name: 'Purple', color: '#9b59b6', damage: 25, range: 110, poison: true, type: 'stab' }, // 직선 찌르기 + 독
+    ORANGE: { name: 'Orange', color: '#e67e22', damage: 18, range: 60, type: 'growing' } // 반복시 커지다 마지막 원형
 };
 
 const keys = {};
@@ -124,41 +128,34 @@ const player = {
     dashSpeed: 10,
     invincible: false,
     invincibleTimer: 0,
-    // 공격 모션용 변수
+    // 연타 방지 및 묵직한 모션 변수
     isAttacking: false,
+    attackCooldown: 0,
     attackAnimTimer: 0,
-    attackAngle: 0
+    attackDuration: 18, // 모션이 제법 길게 보이도록 설정
+    attackAngle: 0,
+    orangeCombo: 0 // 주황색 물감 연속 사용 횟수 (범위 확장용)
 };
 
-const attackParticles = [];
+const attackEffects = [];
 let enemies = [];
 let gameTime = 0;
 let respawnTimer = 0;
 
-// 적 종류 정의 (3가지 타입)
 const ENEMY_TYPES = {
-    SLIME: { name: '슬라이미', radius: 16, hp: 40, speed: 1.8, color: '#2ed573', type: 'slime' },
-    RUNNER: { name: '러너', radius: 12, hp: 25, speed: 3.0, color: '#ffa502', type: 'runner' },
-    TANK: { name: '탱크', radius: 24, hp: 100, speed: 0.9, color: '#a55eea', type: 'tank' }
+    SLIME: { radius: 16, hp: 40, speed: 1.8, color: '#2ed573', type: 'slime' },
+    RUNNER: { radius: 12, hp: 25, speed: 3.0, color: '#f39c12', type: 'runner' },
+    TANK: { radius: 24, hp: 110, speed: 0.85, color: '#8e44ad', type: 'tank' }
 };
 
-// 웨이브별 적 소환 함수
 function spawnWave() {
     enemies = [];
-    // 슬라이미 3마리
-    for(let i=0; i<3; i++) {
-        createRandomEnemy(ENEMY_TYPES.SLIME);
-    }
-    // 러너 2마리
-    for(let i=0; i<2; i++) {
-        createRandomEnemy(ENEMY_TYPES.RUNNER);
-    }
-    // 탱크 1마리
+    for(let i=0; i<3; i++) createRandomEnemy(ENEMY_TYPES.SLIME);
+    for(let i=0; i<2; i++) createRandomEnemy(ENEMY_TYPES.RUNNER);
     createRandomEnemy(ENEMY_TYPES.TANK);
 }
 
 function createRandomEnemy(enemyProto) {
-    // 플레이어와 일정 거리 이상 떨어진 곳에 스폰
     let x, y, dist;
     do {
         x = Math.random() * (canvas.width - 100) + 50;
@@ -167,27 +164,28 @@ function createRandomEnemy(enemyProto) {
     } while (dist < 200);
 
     enemies.push({
-        x: x,
-        y: y,
+        x: x, y: y,
         radius: enemyProto.radius,
         hp: enemyProto.hp,
         maxHp: enemyProto.hp,
         speed: enemyProto.speed,
         color: enemyProto.color,
         type: enemyProto.type,
-        slowTimer: 0
+        slowTimer: 0,
+        poisonTimer: 0,
+        poisonDamageTimer: 0
     });
 }
 
-// 최초 적 소환
 spawnWave();
 
-// --- 이벤트 리스너 ---
 window.addEventListener('keydown', e => {
     keys[e.key.toLowerCase()] = true;
     if (e.key === '1') setPlayerColor(COLOR_TYPES.RED);
     if (e.key === '2') setPlayerColor(COLOR_TYPES.YELLOW);
     if (e.key === '3') setPlayerColor(COLOR_TYPES.BLUE);
+    if (e.key === '4') setPlayerColor(COLOR_TYPES.PURPLE);
+    if (e.key === '5') setPlayerColor(COLOR_TYPES.ORANGE);
     if (e.code === 'Space') performDash();
 });
 
@@ -206,9 +204,12 @@ canvas.addEventListener('mousedown', e => {
 });
 
 function setPlayerColor(colorType) {
+    if (player.currentColor !== colorType) {
+        player.orangeCombo = 0; // 다른 색으로 바꾸면 주황색 콤보 초기화
+    }
     player.currentColor = colorType;
     document.getElementById('color-status').style.color = colorType.color;
-    document.getElementById('color-status').innerText = `현재 물감: ${colorType.name} (${colorType.desc}) [단축키 1, 2, 3]`;
+    document.getElementById('color-status').innerText = `현재 물감: ${colorType.name} [단축키 1~5]`;
 }
 
 function performDash() {
@@ -220,47 +221,84 @@ function performDash() {
     player.invincibleTimer = 15;
 }
 
-// 공격 함수 (모션 트리거 포함)
+// 묵직한 공격 및 연타 방지 처리
 function performAttack() {
-    if (player.isAttacking) return; // 공격 중 중복 입력 방지
-    
+    // 공격 쿨타임(연타 방지) 중이거나 이미 공격 모션 중이면 실행 불가
+    if (player.isAttacking || player.attackCooldown > 0) return;
+
     const angle = Math.atan2(mousePos.y - player.y, mousePos.x - player.x);
     
-    // 공격 모션 상태 활성화
     player.isAttacking = true;
-    player.attackAnimTimer = 10; // 10프레임 동안 휘두르기 모션 재생
+    player.attackAnimTimer = player.attackDuration;
+    player.attackCooldown = player.attackDuration + 8; // 모션 끝난 후에도 살짝 딜레이 주어 연타 원천 차단
     player.attackAngle = angle;
 
-    // 공격 파티클 효과 생성
-    attackParticles.push({
+    let currentRange = player.currentColor.range;
+    let attackType = player.currentColor.type;
+    let isExplosion = false;
+
+    // 주황색 특수 메커니즘 (반복할수록 커지다가 마지막 원형 폭발)
+    if (player.currentColor === COLOR_TYPES.ORANGE) {
+        player.orangeCombo++;
+        if (player.orangeCombo >= 4) {
+            // 4번째 공격은 원형 광역 폭발 후 리셋
+            isExplosion = true;
+            currentRange = 100;
+            player.orangeCombo = 0;
+        } else {
+            currentRange += (player.orangeCombo * 20); // 쓸수록 범위 확대
+        }
+    } else {
+        player.orangeCombo = 0;
+    }
+
+    // 시각적 공격 이펙트 등록
+    attackEffects.push({
         x: player.x,
         y: player.y,
         angle: angle,
         color: player.currentColor.color,
-        range: player.currentColor.range,
-        life: 10,
-        maxLife: 10,
-        damage: player.currentColor.damage,
-        isSlow: player.currentColor.slowEffect || false
+        range: currentRange,
+        life: player.attackDuration,
+        maxLife: player.attackDuration,
+        type: attackType,
+        isExplosion: isExplosion
     });
 
-    // 적 타격 판정
+    // 적 피격 판정
     enemies.forEach(enemy => {
         const dx = enemy.x - player.x;
         const dy = enemy.y - player.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist <= player.currentColor.range + enemy.radius) {
+        const dist = Math.hypot(dx, dy);
+
+        if (attackType === 'stab') {
+            // 보라색: 직선 찌르기 판정 (전방 좁은 각도 내의 직사각형/부채꼴 영역)
             const targetAngle = Math.atan2(dy, dx);
             let angleDiff = Math.abs(angle - targetAngle);
             if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
 
-            if (angleDiff < Math.PI / 3) {
+            if (dist <= currentRange + enemy.radius && angleDiff < Math.PI / 6) {
                 enemy.hp -= player.currentColor.damage;
-                player.energy = Math.min(player.maxEnergy, player.energy + 5);
-                
-                if (player.currentColor.slowEffect) {
-                    enemy.slowTimer = 60;
+                enemy.poisonTimer = 180; // 3초간 독 지속
+                player.energy = Math.min(player.maxEnergy, player.energy + 8);
+            }
+        } else if (isExplosion) {
+            // 주황색 마지막 원형 폭발 판정
+            if (dist <= currentRange + enemy.radius) {
+                enemy.hp -= player.currentColor.damage * 1.8;
+                player.energy = Math.min(player.maxEnergy, player.energy + 10);
+            }
+        } else {
+            // 일반 부채꼴 판정 (Red, Yellow, Blue, 일반 주황색)
+            if (dist <= currentRange + enemy.radius) {
+                const targetAngle = Math.atan2(dy, dx);
+                let angleDiff = Math.abs(angle - targetAngle);
+                if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+
+                if (angleDiff < Math.PI / 3) {
+                    enemy.hp -= player.currentColor.damage;
+                    player.energy = Math.min(player.maxEnergy, player.energy + 5);
+                    if (player.currentColor.slowEffect) enemy.slowTimer = 60;
                 }
             }
         }
@@ -270,15 +308,13 @@ function performAttack() {
 function update() {
     gameTime++;
 
-    // 공격 모션 타이머 처리
+    // 쿨타임 및 공격 모션 타이머 감소
+    if (player.attackCooldown > 0) player.attackCooldown--;
     if (player.isAttacking) {
         player.attackAnimTimer--;
-        if (player.attackAnimTimer <= 0) {
-            player.isAttacking = false;
-        }
+        if (player.attackAnimTimer <= 0) player.isAttacking = false;
     }
 
-    // 플레이어 이동
     let moveX = 0;
     let moveY = 0;
     if (keys['w'] || keys['ㅈ']) moveY -= 1;
@@ -294,7 +330,7 @@ function update() {
     }
 
     if (moveX !== 0 || moveY !== 0) {
-        const length = Math.sqrt(moveX * moveX + moveY * moveY);
+        const length = Math.hypot(moveX, moveY);
         player.x += (moveX / length) * currentSpeed;
         player.y += (moveY / length) * currentSpeed;
     }
@@ -307,13 +343,23 @@ function update() {
         if (player.invincibleTimer <= 0) player.invincible = false;
     }
 
-    // 적 업데이트 및 리스폰 관리
+    // 적 업데이트 (독 데미지, 슬로우 등)
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
 
         if (enemy.hp <= 0) {
             enemies.splice(i, 1);
             continue;
+        }
+
+        // 독 상태이상 처리 (보라색)
+        if (enemy.poisonTimer > 0) {
+            enemy.poisonTimer--;
+            enemy.poisonDamageTimer++;
+            if (enemy.poisonDamageTimer >= 30) { // 0.5초마다 독 데미지
+                enemy.hp -= 5;
+                enemy.poisonDamageTimer = 0;
+            }
         }
 
         let speed = enemy.speed;
@@ -324,7 +370,7 @@ function update() {
 
         const dx = player.x - enemy.x;
         const dy = player.y - enemy.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.hypot(dx, dy);
 
         if (dist > 0) {
             enemy.x += (dx / dist) * speed;
@@ -338,15 +384,13 @@ function update() {
         }
     }
 
-    // 모든 적을 처치했을 경우 리스폰 타이머 작동
     const waveStatus = document.getElementById('wave-status');
     if (enemies.length === 0) {
         respawnTimer++;
         waveStatus.innerText = `모든 적 처치! ${Math.ceil((120 - respawnTimer) / 60)}초 후 리스폰...`;
-        if (respawnTimer >= 120) { // 약 2초 후 리스폰
+        if (respawnTimer >= 120) {
             spawnWave();
             respawnTimer = 0;
-            waveStatus.innerText = "새로운 웨이브 시작!";
         }
     } else {
         waveStatus.innerText = `남은 적 수: ${enemies.length}마리`;
@@ -360,7 +404,6 @@ function draw() {
     ctx.fillStyle = '#2d2b38';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 격자선
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 40) {
@@ -374,49 +417,64 @@ function draw() {
     enemies.forEach(enemy => {
         ctx.beginPath();
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fillStyle = enemy.slowTimer > 0 ? '#70a1ff' : enemy.color;
+        // 독에 걸렸을 때 보라빛 테두리나 색상 변화 표현
+        ctx.fillStyle = enemy.poisonTimer > 0 ? '#b19cd9' : (enemy.slowTimer > 0 ? '#70a1ff' : enemy.color);
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // 적 타입별 이름 표시
         ctx.fillStyle = '#fff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(enemy.type.toUpperCase(), enemy.x, enemy.y - enemy.radius - 6);
 
-        // 적 HP 바
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.fillRect(enemy.x - 15, enemy.y - enemy.radius - 18, 30, 4);
         ctx.fillStyle = '#ff4757';
         ctx.fillRect(enemy.x - 15, enemy.y - enemy.radius - 18, (enemy.hp / enemy.maxHp) * 30, 4);
     });
 
-    // 공격 이펙트
-    for (let i = attackParticles.length - 1; i >= 0; i--) {
-        const p = attackParticles[i];
+    // 공격 이펙트 (찌르기, 부채꼴, 폭발)
+    for (let i = attackEffects.length - 1; i >= 0; i--) {
+        const p = attackEffects[i];
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.arc(p.x, p.y, p.range, p.angle - Math.PI / 3, p.angle + Math.PI / 3);
-        ctx.closePath();
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.life / p.maxLife * 0.5;
-        ctx.fill();
+        if (p.type === 'stab') {
+            // 직선 찌르기 이펙트
+            ctx.translate(player.x, player.y);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life / p.maxLife * 0.7;
+            ctx.fillRect(0, -12, p.range, 24);
+        } else if (p.isExplosion) {
+            // 원형 폭발 이펙트
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.range, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life / p.maxLife * 0.6;
+            ctx.fill();
+        } else {
+            // 부채꼴 이펙트
+            ctx.moveTo(p.x, p.y);
+            ctx.arc(p.x, p.y, p.range, p.angle - Math.PI / 3, p.angle + Math.PI / 3);
+            ctx.closePath();
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life / p.maxLife * 0.5;
+            ctx.fill();
+        }
         ctx.restore();
 
         p.life--;
-        if (p.life <= 0) attackParticles.splice(i, 1);
+        if (p.life <= 0) attackEffects.splice(i, 1);
     }
 
-    // 플레이어 그리기
+    // 플레이어 및 묵직한 공격 모션 그리기
     ctx.save();
     if (player.invincible && Math.floor(gameTime / 4) % 2 === 0) {
         ctx.globalAlpha = 0.4;
     }
 
-    // 본체
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
     ctx.fillStyle = '#f1c40f';
@@ -425,24 +483,28 @@ function draw() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // 공격 모션 (붓 휘두르는 애니메이션 효과)
+    // 붓 모션 (공격 시 앞으로 크게 찌르거나 휘두르는 역동적인 동작)
     let brushDist = 18;
-    let brushAngleOffset = 0;
-    
+    let angleOffset = 0;
+
     if (player.isAttacking) {
-        // 공격할 때 앞으로 휙 휘둘러지는 모션 계산
-        const progress = (10 - player.attackAnimTimer) / 10;
-        brushAngleOffset = (Math.sin(progress * Math.PI) * 0.8) - 0.4;
-        brushDist = 26; // 공격 시 붓이 살짝 앞으로 뻗어나감
+        const progress = (player.attackDuration - player.attackAnimTimer) / player.attackDuration;
+        if (player.currentColor.type === 'stab') {
+            // 찌르기 모션 (앞으로 훅 튀어나감)
+            brushDist = 18 + Math.sin(progress * Math.PI) * 45;
+        } else {
+            // 휘두르기 모션
+            angleOffset = (Math.sin(progress * Math.PI) * 1.2) - 0.6;
+            brushDist = 28;
+        }
     }
 
-    const mouseAngle = Math.atan2(mousePos.y - player.y, mousePos.x - player.x);
-    const finalBrushAngle = mouseAngle + brushAngleOffset;
-    const brushX = player.x + Math.cos(finalBrushAngle) * brushDist;
-    const brushY = player.y + Math.sin(finalBrushAngle) * brushDist;
-    
+    const finalAngle = player.attackAngle + angleOffset;
+    const brushX = player.x + Math.cos(player.isAttacking ? player.attackAngle : Math.atan2(mousePos.y - player.y, mousePos.x - player.x)) * brushDist;
+    const brushY = player.y + Math.sin(player.isAttacking ? player.attackAngle : Math.atan2(mousePos.y - player.y, mousePos.x - player.x)) * brushDist;
+
     ctx.beginPath();
-    ctx.arc(brushX, brushY, player.isAttacking ? 8 : 6, 0, Math.PI * 2);
+    ctx.arc(brushX, brushY, player.isAttacking ? 9 : 6, 0, Math.PI * 2);
     ctx.fillStyle = player.currentColor.color;
     ctx.fill();
     ctx.strokeStyle = '#fff';
