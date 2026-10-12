@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Echoes - Ultimate Colors Prototype</title>
+    <title>Project Echoes - Custom Prototype</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -15,9 +15,34 @@
         }
         #game-container { position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; }
         canvas { display: block; background-color: #2d2b38; }
+        
+        /* 설정 화면 스타일 */
+        #config-screen {
+            position: absolute; top: 0; left: 0; width: 800px; height: 600px;
+            background: rgba(26, 26, 36, 0.95); z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .config-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; width: 100%; max-width: 600px;
+        }
+        .config-item {
+            background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .config-item label { display: block; font-size: 13px; margin-bottom: 5px; font-weight: bold; }
+        .config-item input { width: 100%; margin-bottom: 5px; }
+        
+        #start-btn {
+            background: #2ed573; color: white; border: none; padding: 12px 30px;
+            font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        #start-btn:hover { background: #26af5f; }
+
         #ui-layer {
             position: absolute; top: 15px; left: 15px; pointer-events: none;
-            display: flex; flex-direction: column; gap: 6px; font-size: 13px;
+            display: flex; flex-direction: column; gap: 6px; font-size: 13px; display: none;
         }
         .bar-container {
             width: 200px; height: 14px; background: rgba(0, 0, 0, 0.6);
@@ -30,13 +55,23 @@
         #controls-info {
             position: absolute; bottom: 15px; left: 15px;
             background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 6px;
-            font-size: 12px; pointer-events: none; line-height: 1.4;
+            font-size: 12px; pointer-events: none; line-height: 1.4; display: none;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <!-- 게임 시작 전 스탯 설정 화면 -->
+    <div id="config-screen">
+        <h2>🎨 물감 스탯 커스텀 설정</h2>
+        <p style="font-size: 13px; color: #a4b0be; margin-bottom: 20px;">각 물감의 공격력과 공격 속도(쿨타임, 낮을수록 빠름)를 설정하세요!</p>
+        <div class="config-grid" id="config-inputs">
+            <!-- 자바스크립트로 동적 생성 -->
+        </div>
+        <button id="start-btn" onclick="startGame()">게임 시작!</button>
+    </div>
+
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
     <div id="ui-layer">
@@ -53,9 +88,9 @@
     <div id="controls-info">
         🎮 <b>조작법 & 색상 시스템</b><br>
         - <b>이동:</b> W, A, S, D | <b>대시:</b> Space<br>
-        - <b>일반 공격:</b> 마우스 좌클릭 (색상별 공속/범위 적용)<br>
+        - <b>일반 공격:</b> 마우스 좌클릭 (초록색은 가장 가까운 적 자동 덩굴 공격)<br>
         - <b>특수 스킬:</b> <b>E 키</b> (에너지 소모)<br>
-        - <b>색상 교체:</b> 1(빨강), 2(주황), 3(노랑), 4(초록), 5(파랑), 6(보라)[cite: 3]
+        - <b>색상 교체:</b> 1(빨강), 2(주황), 3(노랑), 4(초록), 5(파랑), 6(보라)
     </div>
 </div>
 
@@ -63,15 +98,42 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// 기획서 내용에 따른 6가지 색상 정의[cite: 3]
-const COLOR_TYPES = {
+// 기본 물감 설정 데이터
+let COLOR_TYPES = {
     RED: { name: '빨강', color: '#ff4757', damage: 30, cooldown: 25, range: 40, type: 'small_arc' },
     ORANGE: { name: '주황', color: '#e67e22', damage: 20, cooldown: 35, range: 35, type: 'growing' },
     YELLOW: { name: '노랑', color: '#f1c40f', damage: 10, cooldown: 15, range: 50, type: 'front_circle', slow: true },
-    GREEN: { name: '초록', color: '#2ecc71', damage: 45, cooldown: 60, range: 75, type: 'wide_arc', knockback: true },
+    GREEN: { name: '초록', color: '#2ecc71', damage: 45, cooldown: 45, range: 150, type: 'vine', knockback: true },
     BLUE: { name: '파랑', color: '#3498db', damage: 15, cooldown: 25, range: 55, type: 'arc', multiHit: true },
     PURPLE: { name: '보라', color: '#9b59b6', damage: 35, cooldown: 40, range: 85, type: 'line', poison: true }
 };
+
+// 설정 화면 인풋박스 동적 생성
+const configContainer = document.getElementById('config-inputs');
+for (let key in COLOR_TYPES) {
+    let item = COLOR_TYPES[key];
+    configContainer.innerHTML += `
+        <div class="config-item" style="border-left: 4px solid ${item.color};">
+            <label>${item.name} 물감</label>
+            공격력: <input type="number" id="dmg_${key}" value="${item.damage}" min="1" max="200">
+            공속(쿨타임): <input type="number" id="cd_${key}" value="${item.cooldown}" min="5" max="100">
+        </div>
+    `;
+}
+
+let gameStarted = false;
+
+function startGame() {
+    // 사용자가 입력한 값으로 스탯 갱신
+    for (let key in COLOR_TYPES) {
+        COLOR_TYPES[key].damage = parseInt(document.getElementById(`dmg_${key}`).value) || 10;
+        COLOR_TYPES[key].cooldown = parseInt(document.getElementById(`cd_${key}`).value) || 20;
+    }
+    document.getElementById('config-screen').style.display = 'none';
+    document.getElementById('ui-layer').style.display = 'flex';
+    document.getElementById('controls-info').style.display = 'block';
+    gameStarted = true;
+}
 
 const keys = {};
 let mousePos = { x: 400, y: 300 };
@@ -124,6 +186,7 @@ function createRandomEnemy(proto) {
 spawnWave();
 
 window.addEventListener('keydown', e => {
+    if (!gameStarted) return;
     keys[e.key.toLowerCase()] = true;
     if (e.key === '1') setPlayerColor(COLOR_TYPES.RED);
     if (e.key === '2') setPlayerColor(COLOR_TYPES.ORANGE);
@@ -141,13 +204,13 @@ canvas.addEventListener('mousemove', e => {
     mousePos.x = e.clientX - rect.left;
     mousePos.y = e.clientY - rect.top;
 });
-canvas.addEventListener('mousedown', e => { if (e.button === 0) performAttack(); });
+canvas.addEventListener('mousedown', e => { if (gameStarted && e.button === 0) performAttack(); });
 
 function setPlayerColor(colorType) {
     if (player.currentColor !== colorType) player.orangeCombo = 0;
     player.currentColor = colorType;
     document.getElementById('color-status').style.color = colorType.color;
-    document.getElementById('color-status').innerText = `현재 물감: ${colorType.name} (단축키 1~6, E: 스킬)[cite: 3]`;
+    document.getElementById('color-status').innerText = `현재 물감: ${colorType.name} (단축키 1~6, E: 스킬)`;
 }
 
 function performDash() {
@@ -157,42 +220,27 @@ function performDash() {
     player.invincible = true; player.invincibleTimer = 15;
 }
 
-// 각 색상별 E키 특수 스킬 구현[cite: 3]
 function triggerSkill() {
     if (player.energy < 35) return;
     player.energy -= 35;
     const angle = Math.atan2(mousePos.y - player.y, mousePos.x - player.x);
 
     if (player.currentColor === COLOR_TYPES.RED) {
-        // 빨강 E: 넓은 부채꼴 큰 데미지 + 화상[cite: 3]
         attackEffects.push({ x: player.x, y: player.y, angle: angle, color: '#ff4757', range: 120, life: 15, maxLife: 15, type: 'wide_burn' });
         enemies.forEach(e => {
-            const dist = Math.hypot(e.x - player.x, e.y - player.y);
-            if (dist <= 120 + e.radius) {
-                e.hp -= 50; e.burnTimer = 180;
-            }
+            if (Math.hypot(e.x - player.x, e.y - player.y) <= 120 + e.radius) { e.hp -= 50; e.burnTimer = 180; }
         });
     } else if (player.currentColor === COLOR_TYPES.ORANGE) {
-        // 주황 E: 바라보는 방향 길게 돌진[cite: 3]
-        player.x += Math.cos(angle) * 120;
-        player.y += Math.sin(angle) * 120;
-        enemies.forEach(e => {
-            if (Math.hypot(e.x - player.x, e.y - player.y) < e.radius + 20) {
-                e.hp -= 40;
-            }
-        });
+        player.x += Math.cos(angle) * 120; player.y += Math.sin(angle) * 120;
+        enemies.forEach(e => { if (Math.hypot(e.x - player.x, e.y - player.y) < e.radius + 20) e.hp -= 40; });
     } else if (player.currentColor === COLOR_TYPES.YELLOW) {
-        // 노랑 E: HP 회복 + 이속 증가[cite: 3]
         player.hp = Math.min(player.maxHp, player.hp + 25);
         player.speedBoostTimer = 180;
     } else if (player.currentColor === COLOR_TYPES.GREEN) {
-        // 초록 E: 보호막 생성(최대체력 10%)[cite: 3]
         player.shield = player.maxHp * 0.1;
     } else if (player.currentColor === COLOR_TYPES.BLUE) {
-        // 파랑 E: 다른 적에게 튀기는 물 탄환 발사[cite: 3]
         projectiles.push({ x: player.x, y: player.y, vx: Math.cos(angle)*7, vy: Math.sin(angle)*7, type: 'bounce', damage: 25 });
     } else if (player.currentColor === COLOR_TYPES.PURPLE) {
-        // 보라 E: 세 갈래 독 탄환 발사[cite: 3]
         [-0.3, 0, 0.3].forEach(offset => {
             projectiles.push({ x: player.x, y: player.y, vx: Math.cos(angle+offset)*5, vy: Math.sin(angle+offset)*5, type: 'poison_bullet', damage: 25 });
         });
@@ -210,18 +258,34 @@ function performAttack() {
     let attackType = player.currentColor.type;
     let isCircleExplode = false;
 
-    // 주황색 범위 성장 메커니즘[cite: 3]
     if (player.currentColor === COLOR_TYPES.ORANGE) {
         player.orangeCombo++;
-        if (player.orangeCombo >= 4) {
-            isCircleExplode = true;
-            currentRange = 90;
-            player.orangeCombo = 0;
-        } else {
-            currentRange += (player.orangeCombo * 18);
-        }
+        if (player.orangeCombo >= 4) { isCircleExplode = true; currentRange = 90; player.orangeCombo = 0; }
+        else { currentRange += (player.orangeCombo * 18); }
     } else {
         player.orangeCombo = 0;
+    }
+
+    // 초록색 특수 로직: 가장 가까운 적 한 명에게 덩굴 타격
+    if (attackType === 'vine') {
+        let closestEnemy = null;
+        let minDist = Infinity;
+        enemies.forEach(e => {
+            let dist = Math.hypot(e.x - player.x, e.y - player.y);
+            if (dist <= currentRange && dist < minDist) {
+                minDist = dist;
+                closestEnemy = e;
+            }
+        });
+
+        if (closestEnemy) {
+            applyDamageAndEffect(closestEnemy, player.currentColor);
+            attackEffects.push({
+                x: player.x, y: player.y, targetX: closestEnemy.x, targetY: closestEnemy.y,
+                color: player.currentColor.color, life: 12, maxLife: 12, type: 'vine_effect'
+            });
+        }
+        return;
     }
 
     attackEffects.push({
@@ -229,18 +293,13 @@ function performAttack() {
         range: currentRange, life: 12, maxLife: 12, type: attackType, isCircleExplode: isCircleExplode
     });
 
-    // 일반 공격 타격 판정 및 특수 효과
     enemies.forEach(enemy => {
         const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
         
         if (attackType === 'line' || attackType === 'front_circle') {
-            if (dist <= currentRange + enemy.radius) {
-                applyDamageAndEffect(enemy, player.currentColor);
-            }
+            if (dist <= currentRange + enemy.radius) applyDamageAndEffect(enemy, player.currentColor);
         } else if (isCircleExplode) {
-            if (dist <= currentRange + enemy.radius) {
-                applyDamageAndEffect(enemy, player.currentColor, 1.5);
-            }
+            if (dist <= currentRange + enemy.radius) applyDamageAndEffect(enemy, player.currentColor, 1.5);
         } else {
             const targetAngle = Math.atan2(enemy.y - player.y, enemy.x - player.x);
             let angleDiff = Math.abs(angle - targetAngle);
@@ -248,7 +307,6 @@ function performAttack() {
 
             if (dist <= currentRange + enemy.radius && angleDiff < Math.PI / 3) {
                 applyDamageAndEffect(enemy, player.currentColor);
-                // 파랑색 연속 공격 (최대 3회 메커니즘)[cite: 3]
                 if (player.currentColor.multiHit) {
                     setTimeout(() => { enemy.hp -= 10; }, 150);
                 }
@@ -264,12 +322,14 @@ function applyDamageAndEffect(enemy, colorData, multiplier = 1) {
     if (colorData.slow) enemy.slowTimer = 60;
     if (colorData.poison) enemy.poisonTimer = 180;
     if (colorData.knockback) {
-        enemy.x += Math.cos(player.attackAngle) * 35;
-        enemy.y += Math.sin(player.attackAngle) * 35;
+        const kbAngle = Math.atan2(enemy.y - player.y, enemy.x - player.x);
+        enemy.x += Math.cos(kbAngle) * 40;
+        enemy.y += Math.sin(kbAngle) * 40;
     }
 }
 
 function update() {
+    if (!gameStarted) return;
     gameTime++;
     if (player.attackCooldown > 0) player.attackCooldown--;
     if (player.isAttacking) {
@@ -304,11 +364,9 @@ function update() {
         if (player.invincibleTimer <= 0) player.invincible = false;
     }
 
-    // 투사체 업데이트
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
         p.x += p.vx; p.y += p.vy;
-        
         enemies.forEach(e => {
             if (Math.hypot(e.x - p.x, e.y - p.y) < e.radius + 8) {
                 e.hp -= p.damage;
@@ -319,19 +377,12 @@ function update() {
         if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) projectiles.splice(i, 1);
     }
 
-    // 적 상태 및 피격 처리
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
         if (enemy.hp <= 0) { enemies.splice(i, 1); continue; }
 
-        if (enemy.burnTimer > 0) {
-            enemy.burnTimer--;
-            if (gameTime % 30 === 0) enemy.hp -= 8;
-        }
-        if (enemy.poisonTimer > 0) {
-            enemy.poisonTimer--;
-            if (gameTime % 30 === 0) enemy.hp -= 6;
-        }
+        if (enemy.burnTimer > 0) { enemy.burnTimer--; if (gameTime % 30 === 0) enemy.hp -= 8; }
+        if (enemy.poisonTimer > 0) { enemy.poisonTimer--; if (gameTime % 30 === 0) enemy.hp -= 6; }
 
         let speed = enemy.speed;
         if (enemy.slowTimer > 0) { speed *= 0.4; enemy.slowTimer--; }
@@ -343,12 +394,8 @@ function update() {
         }
 
         if (dist < player.radius + enemy.radius && !player.invincible) {
-            if (player.shield > 0) {
-                player.shield -= 15;
-                if (player.shield < 0) player.shield = 0;
-            } else {
-                player.hp = Math.max(0, player.hp - 10);
-            }
+            if (player.shield > 0) { player.shield -= 15; if (player.shield < 0) player.shield = 0; }
+            else { player.hp = Math.max(0, player.hp - 10); }
             player.invincible = true; player.invincibleTimer = 30;
         }
     }
@@ -371,29 +418,29 @@ function draw() {
     ctx.fillStyle = '#2d2b38';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 격자선
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
     for (let x = 0; x < canvas.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
     for (let y = 0; y < canvas.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-    // 적 그리기
     enemies.forEach(e => {
         ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
         ctx.fillStyle = e.burnTimer > 0 ? '#e74c3c' : (e.poisonTimer > 0 ? '#9b59b6' : e.color);
         ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
     });
 
-    // 투사체 그리기
     projectiles.forEach(p => {
         ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
         ctx.fillStyle = '#3498db'; ctx.fill();
     });
 
-    // 공격 효과
     for (let i = attackEffects.length - 1; i >= 0; i--) {
         const p = attackEffects[i];
         ctx.save(); ctx.beginPath();
-        if (p.type === 'line') {
+        if (p.type === 'vine_effect') {
+            // 초록색 덩굴 이펙트 선 긋기
+            ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 3;
+            ctx.moveTo(p.x, p.y); ctx.lineTo(p.targetX, p.targetY); ctx.stroke();
+        } else if (p.type === 'line') {
             ctx.translate(player.x, player.y); ctx.rotate(p.angle);
             ctx.fillStyle = p.color; ctx.globalAlpha = p.life / p.maxLife * 0.7;
             ctx.fillRect(0, -10, p.range, 20);
@@ -409,18 +456,18 @@ function draw() {
         p.life--; if (p.life <= 0) attackEffects.splice(i, 1);
     }
 
-    // 플레이어 그리기
-    ctx.save();
-    if (player.invincible && Math.floor(gameTime / 4) % 2 === 0) ctx.globalAlpha = 0.4;
-    ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#f1c40f'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    if (gameStarted) {
+        ctx.save();
+        if (player.invincible && Math.floor(gameTime / 4) % 2 === 0) ctx.globalAlpha = 0.4;
+        ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#f1c40f'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
 
-    // 보호막 오라 표시
-    if (player.shield > 0) {
-        ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 6, 0, Math.PI * 2);
-        ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 2; ctx.stroke();
+        if (player.shield > 0) {
+            ctx.beginPath(); ctx.arc(player.x, player.y, player.radius + 6, 0, Math.PI * 2);
+            ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 2; ctx.stroke();
+        }
+        ctx.restore();
     }
-    ctx.restore();
 }
 
 function loop() { update(); draw(); requestAnimationFrame(loop); }
