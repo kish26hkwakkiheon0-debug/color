@@ -96,7 +96,7 @@ button:focus-visible{outline:.3cqw solid var(--yellow);outline-offset:.2cqw}
 .screen{position:absolute;inset:0;display:none;align-items:center;justify-content:flex-start;padding:0 6cqw;z-index:5}
 .screen.on{display:flex}
 #sTitle{background:linear-gradient(90deg,#0d0b14f2 0,#0d0b14d9 38%,#0d0b1440 70%,#0d0b1400 100%)}
-#sTitle .col{display:flex;flex-direction:column;gap:1.1cqw;width:42cqw}
+#sTitle .col{display:flex;flex-direction:column;gap:.9cqw;width:42cqw}
 .eyebrow{font:1.5cqw/1 var(--f-pixel);letter-spacing:.5cqw;color:var(--muted)}
 .logo{font:8.4cqw/.95 var(--f-pixel);color:var(--paper);margin:.2cqw 0 .6cqw -.2cqw;
   text-shadow:.45cqw .45cqw 0 var(--red),.9cqw .9cqw 0 var(--yellow),1.35cqw 1.35cqw 0 var(--blue)}
@@ -108,7 +108,7 @@ button:focus-visible{outline:.3cqw solid var(--yellow);outline-offset:.2cqw}
 .mbtn em{font:normal 1cqw/1 var(--f-pixel);color:var(--muted)}
 .mbtn:hover,.mbtn:focus-visible{transform:translateX(.7cqw);border-color:var(--paper);background:#241e38}
 .mbtn.main{font-size:2.1cqw;padding-block:1.3cqw}
-.help{margin-top:1.6cqw;font-size:1.35cqw;line-height:1.7;color:var(--muted)}
+.help{margin-top:1.2cqw;font-size:1.35cqw;line-height:1.7;color:var(--muted)}
 .help b{color:var(--paper);font-weight:400;font-family:var(--f-pixel);font-size:1.05cqw;padding:.15cqw .5cqw;border:.2cqw solid var(--line);background:#171326;margin:0 .2cqw}
 .touchHelp{display:none}
 body.touch .pcHelp{display:none}
@@ -131,6 +131,87 @@ body.touch .touchHelp{display:block}
 .center{justify-content:center}
 #sPause,#sOver,#sClear{background:#0d0b14a6;justify-content:center}
 
+/* ───── 설정 · 도감 · 토스트 ───── */
+.menuRow{display:flex;gap:.8cqw}
+.mbtn.sm{flex:1 1 0;justify-content:center;padding:1cqw .8cqw 1cqw 1.8cqw;font-size:1.7cqw}
+.mbtn.sm:hover,.mbtn.sm:focus-visible{transform:translateY(-.3cqw)}
+#sSettings,#sCodex{background:#0d0b14d9;justify-content:center}
+.setPanel{min-width:58cqw}
+.setRow{display:grid;grid-template-columns:15cqw 1fr 5cqw;align-items:center;gap:1.6cqw;padding:.5cqw 0;font-size:1.7cqw}
+.setRow label{font-family:var(--f-display)}
+.setRow output{font:1.5cqw/1 var(--f-pixel);text-align:right;color:var(--paper)}
+.setPanel .row{justify-content:flex-end}
+.setPanel .row .mbtn{flex:0 0 auto;min-width:20cqw}
+.panel p.setNote{font-size:1.3cqw;line-height:1.55;margin-top:.4cqw}
+.slider{position:relative;height:3cqw;cursor:pointer;touch-action:none;outline:none;--v:1}
+.slider::before{content:"";position:absolute;left:0;right:0;top:50%;height:1.3cqw;transform:translateY(-50%);background:#0b0912;border:.3cqw solid #000;box-shadow:0 0 0 .25cqw #f1ead840}
+.slider i{position:absolute;left:.3cqw;top:50%;height:.7cqw;margin-top:-.35cqw;width:calc((100% - .6cqw) * var(--v));background:var(--c,var(--yellow))}
+.slider b{position:absolute;top:0;left:calc(var(--v) * (100% - 1.8cqw));width:1.8cqw;height:3cqw;background:var(--paper);border:.3cqw solid #000;box-shadow:inset -.4cqw -.4cqw 0 #0003}
+.slider:hover b{background:#fff}
+.slider:focus-visible b{outline:.3cqw solid var(--yellow);outline-offset:.2cqw}
+body.cdx #stage{touch-action:pan-y}
+#sCodex{padding:2.4cqw 4cqw}
+.cdx{width:100%;height:100%;display:flex;flex-direction:column;gap:1.4cqw;background:#120f1dee;border:.35cqw solid var(--line);box-shadow:.8cqw .8cqw 0 #000a;padding:1.6cqw 2.2cqw 1.8cqw}
+.cdxHead{display:flex;align-items:center;gap:2cqw}
+.cdxHead h2{margin:0;font:3cqw/1 var(--f-display);text-shadow:.25cqw .25cqw 0 #000,.5cqw .5cqw 0 var(--purple)}
+.tabs{display:flex;align-items:center;gap:.6cqw;flex:1}
+.tab{background:#171326;border:.3cqw solid var(--line);padding:.8cqw 1.8cqw;font:1.6cqw/1 var(--f-display);color:var(--muted)}
+.tab:hover{border-color:var(--paper);color:var(--paper)}
+.tab.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+#cdxCount{margin-left:1.2cqw;font:1.35cqw/1 var(--f-body);color:var(--muted)}
+.cdxHead .mbtn{padding:.8cqw 1.6cqw;font-size:1.5cqw}
+.cdxHead .mbtn::before{display:none}
+.cdxHead .mbtn:hover,.cdxHead .mbtn:focus-visible{transform:none}
+.cdxBody{flex:1;min-height:0;display:grid;grid-template-columns:19cqw minmax(0,1fr);gap:1.8cqw}
+.cdxList{display:flex;flex-direction:column;gap:.6cqw;overflow-y:auto;padding:.3cqw .5cqw .3cqw .3cqw;overscroll-behavior:contain;touch-action:pan-y}
+.cdxItem{display:flex;align-items:center;gap:1cqw;padding:.9cqw 1cqw;background:#171326;border:.3cqw solid var(--line);text-align:left;font:1.6cqw/1.1 var(--f-display);color:var(--paper)}
+.cdxItem .no{font:1cqw/1 var(--f-pixel);color:var(--muted)}
+.cdxItem .sw{width:2cqw;height:2cqw;flex:none;background:var(--c);border:.25cqw solid #000}
+.cdxItem:hover{border-color:var(--paper)}
+.cdxItem.on{border-color:var(--c);background:#241e38;box-shadow:inset .6cqw 0 0 var(--c)}
+.cdxItem.lock .nm{color:var(--muted)}
+.cdxDetail{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding-right:.8cqw;font-size:1.45cqw;line-height:1.55}
+.cdxGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.8cqw;align-items:start}
+.cdxCol{display:flex;flex-direction:column;gap:1.3cqw;min-width:0}
+.cdxHero{display:flex;gap:1.6cqw;align-items:center}
+.cdxHero h3{margin:0;font:2.7cqw/1.1 var(--f-display);color:var(--c);text-shadow:.2cqw .2cqw 0 #000}
+.cdxHero .sub{margin-top:.5cqw;font:1.25cqw/1.4 var(--f-body);color:var(--muted);letter-spacing:.1cqw}
+.cdxHero .sub.en{font:1cqw/1.4 var(--f-pixel);letter-spacing:.15cqw}
+.cdxHero p{margin:.7cqw 0 0;color:var(--paper)}
+.swatch{position:relative;width:9.5cqw;height:9.5cqw;flex:none;background:var(--c);border:.4cqw solid #000;box-shadow:inset -1cqw -1cqw 0 #0004,inset 1cqw 1cqw 0 #fff5,0 0 3cqw var(--c)}
+.swatch b{position:absolute;left:.7cqw;top:.5cqw;font:1.5cqw/1 var(--f-pixel);color:#000;opacity:.75}
+.pv{flex:none;image-rendering:pixelated;border:.3cqw solid #000;background:#1a1626}
+.kv{display:grid;grid-template-columns:8.5cqw minmax(0,1fr);gap:.5cqw 1.2cqw;margin:0;padding:1cqw 1.2cqw;background:#0b0912aa;border:.25cqw solid var(--line)}
+.kv dt{color:var(--muted);font-size:1.3cqw}
+.kv dd{margin:0;color:var(--paper);font:1.7cqw/1.4 var(--f-pixel)}
+.kv dd small{font:1.25cqw/1.4 var(--f-body);color:var(--muted)}
+.kv dd.t{font:1.45cqw/1.5 var(--f-body)}
+.box{padding:1cqw 1.3cqw;background:#0b0912aa;border:.25cqw solid var(--line);border-left:.7cqw solid var(--c,var(--yellow))}
+.box h4{margin:0 0 .4cqw;font:1.55cqw/1.2 var(--f-display);color:var(--paper)}
+.box h4 em{font:normal 1.1cqw/1 var(--f-pixel);color:#000;background:var(--c);padding:.25cqw .6cqw;margin-right:.6cqw}
+.box h4 small{font:.95cqw/1 var(--f-pixel);color:var(--muted);margin-left:.6cqw}
+.box p{margin:0;color:var(--paper)}
+.box .meta{margin-top:.5cqw;font-size:1.25cqw;color:var(--muted)}
+.cdxNote{margin:0;font-size:1.2cqw;color:var(--muted)}
+.patList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.8cqw}
+.patList li{padding:.8cqw 1.1cqw;background:#0b0912aa;border:.25cqw solid var(--line);border-left:.7cqw solid var(--c,var(--yellow))}
+.patList b{font:1.5cqw/1.2 var(--f-display)}
+.patList em{float:right;font:normal 1.2cqw/1.6 var(--f-pixel);color:var(--yellow)}
+.patList em.nd{color:var(--muted);font-family:var(--f-body)}
+.patList span{display:block;margin-top:.3cqw;color:var(--muted);font-size:1.3cqw}
+.tipList{margin:0;padding-left:2cqw;display:flex;flex-direction:column;gap:.6cqw;color:var(--paper)}
+.tipList li::marker{color:var(--yellow)}
+.cdxSec{margin:0;font:1.4cqw/1 var(--f-display);color:var(--muted)}
+.cdxEmpty{height:100%;min-height:24cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8cqw;text-align:center;color:var(--muted)}
+.cdxEmpty .q{font:7cqw/1 var(--f-pixel);color:#3a3354}
+.cdxEmpty b{font:2cqw/1.3 var(--f-display);color:var(--paper)}
+.cdxEmpty p{margin:0;font-size:1.5cqw}
+#toast{position:absolute;right:1.6cqw;top:11.4cqw;max-width:30cqw;background:#0b0912e6;border:.3cqw solid #f1ead833;border-left:.9cqw solid var(--tc,var(--yellow));padding:.8cqw 1.4cqw;font:1.6cqw/1.3 var(--f-display);opacity:0;pointer-events:none}
+#toast small{display:block;margin-bottom:.4cqw;font:.9cqw/1 var(--f-pixel);letter-spacing:.2cqw;color:var(--tc,var(--yellow))}
+#toast.show{animation:toast 3.2s ease-out forwards}
+@keyframes toast{0%{opacity:0;transform:translateX(2cqw)}8%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+@keyframes toastFade{0%{opacity:0}8%{opacity:1}85%{opacity:1}100%{opacity:0}}
+
 /* ───── 터치 컨트롤 ───── */
 #touch{position:absolute;inset:0;pointer-events:none;display:none;z-index:3}
 body.touch #touch{display:block}
@@ -151,7 +232,7 @@ body.touch #touch{display:block}
 #btnSkill.rdy{opacity:1;box-shadow:0 0 0 .4cqw #fff,inset -.8cqw -.8cqw 0 #0003}
 #rotate{position:absolute;inset:0;background:var(--ink);z-index:20;display:none;place-items:center;text-align:center;padding:6vw;font:700 4.4vw/1.5 var(--f-display)}
 @media (orientation:portrait) and (max-width:900px){#rotate{display:grid}}
-@media (prefers-reduced-motion:reduce){#banner.show{animation-duration:.01s;opacity:1}#hint.pop{animation:none}}
+@media (prefers-reduced-motion:reduce){#banner.show{animation-duration:.01s;opacity:1}#hint.pop{animation:none}#toast.show{animation-name:toastFade}}
 </style>
 </head>
 <body>
@@ -177,6 +258,7 @@ body.touch #touch{display:block}
     <div id="train" hidden><div class="tt">TRAINING</div><div>마지막 피해 <b id="trLast">0</b></div><div>최근 3초 DPS <b id="trDps">0.0</b></div><div>누적 <b id="trTotal">0</b> · <b id="trHits">0</b>타</div><small>R 기록 초기화 · ESC 일시정지</small></div>
     <div id="bossBar"><div class="bn"><span>잿빛 파수꾼</span><em id="bossPhase">PHASE 1</em></div><div class="bb"><i id="bossFill"></i></div></div>
     <div id="banner"><div class="b1" id="b1"></div><div class="b2" id="b2"></div></div>
+    <div id="toast" role="status"></div>
   </div>
 
   <div id="touch">
@@ -201,7 +283,11 @@ body.touch #touch{display:block}
         <button class="mbtn main" id="mStart" style="--c:var(--red)" type="button">처음부터 시작 <em>CH.1</em></button>
         <button class="mbtn" data-ch="2" style="--c:var(--yellow)" type="button">Chapter 2 · 깊은 숲 <em>색 게이트</em></button>
         <button class="mbtn" data-ch="3" style="--c:var(--blue)" type="button">Chapter 3 · 버려진 마을 <em>BOSS</em></button>
-        <button class="mbtn" id="mTrain" style="--c:var(--green)" type="button">훈련장 <em>TRAINING</em></button>
+        <div class="menuRow">
+          <button class="mbtn sm" id="mTrain" style="--c:var(--green)" type="button">훈련장</button>
+          <button class="mbtn sm" id="mCodex" style="--c:var(--purple)" type="button">도감</button>
+          <button class="mbtn sm" id="mSet" style="--c:var(--paper)" type="button">설정</button>
+        </div>
       </div>
       <div class="help pcHelp">이동 <b>W</b><b>A</b><b>S</b><b>D</b> · 대시 <b>SPACE</b> · 공격 <b>좌클릭</b> · 스킬 <b>E</b> (우클릭) · 물감 <b>1</b><b>2</b><b>3</b> <span style="opacity:.7">(<b>4</b><b>5</b> 보스 처치 후)</span><br>일시정지 <b>ESC</b> · 소리 <b>M</b> · FPS 표시 <b>F3</b></div>
       <div class="help touchHelp">왼쪽 조이스틱으로 이동 · 오른쪽 아래 PAINT로 공격, DASH로 회피<br>위쪽 숫자 버튼으로 물감 변경 · E 버튼으로 스킬</div>
@@ -210,7 +296,7 @@ body.touch #touch{display:block}
 
   <div class="screen" id="sPause">
     <div class="panel" style="--c:var(--blue)"><h2>일시정지</h2><p>잠시 붓을 내려놓았습니다.</p>
-      <div class="row"><button class="mbtn pri" id="pResume" type="button">계속하기</button><button class="mbtn" id="pTitle" type="button">타이틀로</button></div></div>
+      <div class="row"><button class="mbtn pri" id="pResume" type="button">계속하기</button><button class="mbtn" id="pSet" type="button">설정</button><button class="mbtn" id="pTitle" type="button">타이틀로</button></div></div>
   </div>
   <div class="screen" id="sOver">
     <div class="panel" style="--c:var(--red)"><h2>쓰러졌다</h2><p id="overTxt">색이 흐려진다…</p>
@@ -221,6 +307,26 @@ body.touch #touch{display:block}
       <div class="stats" id="clStats"></div>
       <div class="unlock" id="clUnlock" hidden><span class="sw g"></span><span class="sw p"></span><div><b>새 물감 해금: 초록 · 보라</b><br>초록(4번)은 덩굴, 보라(5번)는 독 찌르기.<small>다음 플레이부터 쓸 수 있고, 훈련장에서는 언제든 써 볼 수 있어요.</small></div></div>
       <div class="row"><button class="mbtn pri" id="cNext" type="button">다음 챕터 <em>ENTER</em></button><button class="mbtn" id="cTitle" type="button">타이틀로</button></div></div>
+  </div>
+
+  <div class="screen" id="sSettings">
+    <div class="panel setPanel" style="--c:var(--paper)"><h2>설정</h2>
+      <p>소리 크기를 조절합니다. 설정은 이 브라우저에 저장돼요.</p>
+      <div class="setRow"><label id="lbMaster">마스터 사운드</label><div class="slider" data-k="master" role="slider" tabindex="0" aria-labelledby="lbMaster" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--c:var(--paper)"><i></i><b></b></div><output>100</output></div>
+      <div class="setRow"><label id="lbBgm">BGM</label><div class="slider" data-k="bgm" role="slider" tabindex="0" aria-labelledby="lbBgm" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--c:var(--blue)"><i></i><b></b></div><output>100</output></div>
+      <div class="setRow"><label id="lbSfx">효과음</label><div class="slider" data-k="sfx" role="slider" tabindex="0" aria-labelledby="lbSfx" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--c:var(--red)"><i></i><b></b></div><output>100</output></div>
+      <p class="setNote">마스터는 전체 음량, BGM은 배경음악, 효과음은 공격·피격 등 게임 소리입니다. 슬라이더는 마우스·터치로 끌거나 방향키(←→, Shift = 크게)로 조절할 수 있어요.</p>
+      <div class="row"><button class="mbtn pri" id="setClose" type="button">닫기 <em>ESC</em></button></div></div>
+  </div>
+  <div class="screen" id="sCodex">
+    <div class="cdx">
+      <div class="cdxHead">
+        <h2>도감</h2>
+        <div class="tabs" role="tablist"><button class="tab on" data-tab="paint" role="tab" type="button">물감 도감</button><button class="tab" data-tab="mon" role="tab" type="button">몬스터 도감</button><span id="cdxCount"></span></div>
+        <button class="mbtn" id="cdxClose" type="button">닫기 <em>ESC</em></button>
+      </div>
+      <div class="cdxBody"><div class="cdxList" id="cdxList"></div><div class="cdxDetail" id="cdxDetail"></div></div>
+    </div>
   </div>
 
   <div id="rotate">기기를 가로로 돌려 주세요<br><span style="font:1.4em var(--f-pixel);color:var(--muted)">ROTATE</span></div>
@@ -267,10 +373,10 @@ const PAINTS = {
     shape: 'circle', dmg: 10, range: 50, arc: 140, cost: 8, cd: 1 / 3.3, kb: 30, slow: 2.0, hit: 4, stop: 0.03,
     skill: { ko: '활력', tag: 'RUSH', cost: 20, cd: 10, heal: 25, haste: 1.4, hasteT: 3.5 } },
   blue: { key: 'blue', ko: '파란색', col: '#4189ff', hi: '#a3c9ff', lo: '#1d3f9a',
-    shape: 'fan', dmg: 6, range: 46, arc: 110, cost: 4, cd: 1 / 3.8, kb: 40, slow: 0, hit: 2, stop: 0.012, chain: 3,
+    shape: 'fan', dmg: 6, range: 46, arc: 110, cost: 4, cd: 1 / (3.8 * 0.8), kb: 40, slow: 0, hit: 2, stop: 0.012, chain: 3,
     skill: { ko: '물 탄환', tag: 'SPLASH', cost: 16, cd: 5, dmg: 14, speed: 240, bounces: 3, bounceRange: 110 } },
   green: { key: 'green', ko: '초록색', col: '#3fc46b', hi: '#b6f5a0', lo: '#1b7a3e',
-    shape: 'vine', dmg: 40, range: 96, arc: 0, cost: 11, cd: 1 / 1.1, kb: 190, slow: 0, hit: 9, stop: 0.07,
+    shape: 'vine', dmg: 40, range: 96 * 1.1, arc: 0, cost: 11, cd: 1 / 1.1, kb: 190, slow: 0, hit: 9, stop: 0.07,
     skill: { ko: '수호 보호막', tag: 'SHIELD', cost: 18, cd: 9, shieldPct: 0.10, dur: 6 } },
   purple: { key: 'purple', ko: '보라색', col: '#9b4de0', hi: '#d8b0ff', lo: '#55228f',
     shape: 'line', dmg: 21, range: 70, width: 12, arc: 0, cost: 10, cd: 0.5, kb: 20, slow: 0, hit: 6, stop: 0.05, poison: { dps: 4, t: 3 },
@@ -278,12 +384,37 @@ const PAINTS = {
 };
 const PAINT_KEYS = ['red', 'yellow', 'blue', 'green', 'purple'];
 
-const EDEF = {
-  slime:   { hp: 36,   r: 6,  speed: 36, aggro: 120 },
-  hound:   { hp: 30,   r: 6,  speed: 62, aggro: 150 },
-  spitter: { hp: 28,   r: 6,  speed: 32, aggro: 170 },
+const EDEF = {            // dmg = 플레이어에게 주는 피해 (도감에도 표시됨)
+  slime:   { hp: 36,   r: 6,  speed: 36, aggro: 120, dmg: 14 },
+  hound:   { hp: 30,   r: 6,  speed: 62, aggro: 150, dmg: 12 },
+  spitter: { hp: 28,   r: 6,  speed: 32, aggro: 170, dmg: 10 },
   dummy:   { hp: 9999, r: 7,  speed: 0,  aggro: 0 },
-  boss:    { hp: 520,  r: 16, speed: 26, aggro: 9999 },
+  boss:    { hp: 520,  r: 16, speed: 26, aggro: 9999, dmg: { contact: 10, slam: 28, ring: 16, burst: 11, rain: 20 } },
+};
+
+// 몬스터 도감 텍스트 (체력·공격력 숫자는 EDEF에서 가져옵니다)
+const CODEX_MON = {
+  slime: { name: '슬라임', col: '#7bc96f',
+    desc: '초원과 숲에 사는 말랑한 젤리 몬스터. 느릿느릿 다가오지만, 몸을 웅크리면 곧 튀어 오른다.',
+    patterns: [['몸통 돌진', 'dmg', '가까워지면 몸을 웅크려 방향을 정한 뒤 직선으로 돌진합니다. 돌진 뒤 쉬는 틈에 반격하면 1.4배 피해.']] },
+  hound: { name: '그림자 사냥개', col: '#6e6788',
+    desc: '폐허와 숲을 떠도는 날랜 사냥개. 플레이어 주변을 맴돌며 빈틈을 노린다.',
+    patterns: [['달려들기', 'dmg', '일정 거리를 두고 맴돌다가, 눈이 번쩍이면 빠르게 달려듭니다. 돌진 직후 잠깐 멈추는 순간이 기회.']] },
+  spitter: { name: '포자 버섯', col: '#c85fa8',
+    desc: '커다란 갓을 쓴 버섯 몬스터. 가까이 다가가면 물러나 거리를 벌린다.',
+    patterns: [['포자 탄환', 'dmg', '멀리서 포자를 쏩니다. 숲에서는 세 갈래로 퍼져 날아옵니다. 붓으로 탄환을 쳐서 지울 수 있어요.']] },
+  boss: { name: '잿빛 파수꾼', en: 'ASHEN WARDEN', col: '#8a8594',
+    desc: '버려진 마을의 광장을 지키는 거대한 석상. 마을의 색을 앗아간 잿빛의 중심이다.',
+    patterns: [['내려찍기', 'slam', '붉은 범위가 플레이어를 따라오다 고정된 뒤 폭발합니다.'],
+               ['충격파', 'ring', '몸 중심에서 고리가 퍼져 나갑니다.'],
+               ['탄막', 'burst', '사방으로 탄환을 흩뿌립니다.'],
+               ['낙석 (2페이즈)', 'rain', '플레이어 주변 여러 곳에 동시에 떨어집니다.'],
+               ['몸통 접촉', 'contact', '가까이 붙으면 밀려나며 피해를 입습니다.'],
+               ['소환 (체력 30% 미만)', null, '사냥개 두 마리를 불러냅니다.']],
+    tips: ['평소에는 받는 피해가 절반 정도(55%)로 줄어듭니다. 패턴이 끝나 비틀거릴 때(밝은 숫자)를 노려 집중 공격하세요. 이때는 피해가 1.6배!',
+           '내려찍기는 범위가 고정되는 순간 대시로 빠져나오면 회피 성공 — 에너지가 회복됩니다.',
+           '충격파와 탄막도 대시의 무적 시간으로 통과할 수 있고, 탄환은 붓으로 쳐서 지울 수도 있어요.',
+           '체력 50% 이하(2페이즈)부터 패턴이 빨라지고 낙석이 추가됩니다. 30% 미만에서 나오는 사냥개는 먼저 처리하세요.'] },
 };
 
 /* ───────────────── 유틸 ───────────────── */
@@ -306,8 +437,10 @@ const inp = { cx: W / 2, cy: H / 2, atk: false, dashQ: false, colorQ: null, skil
 
 addEventListener('keydown', e => {
   const c = e.code;
+  if (modal) { if (c === 'Escape' && !e.repeat) closeModal(); return; }   // 도감·설정 창
   if (c === 'Space' || c.startsWith('Arrow')) e.preventDefault();
   if (e.repeat) return;
+  if (c === 'Enter' && document.activeElement && document.activeElement.tagName === 'BUTTON') return;   // 포커스된 버튼은 Enter로 직접 누름
   keys[c] = true;
   const st = G.state;
   if (st === 'play') {
@@ -344,7 +477,7 @@ stage.addEventListener('pointerdown', e => {
     if (e.button === 0 && G.state === 'play' && e.target === canvas) inp.atk = true;
     if (e.button === 2 && G.state === 'play' && e.target === canvas) inp.skillQ = true;   // 우클릭 = 스킬
   } else enableTouch();
-  if (document.activeElement !== stage && !e.target.closest('button')) stage.focus({ preventScroll: true });
+  if (document.activeElement !== stage && !e.target.closest('button,.slider')) stage.focus({ preventScroll: true });
 });
 addEventListener('pointerup', e => { if (e.pointerType === 'mouse' && e.button === 0) inp.atk = false; });
 stage.addEventListener('contextmenu', e => e.preventDefault());
@@ -401,7 +534,8 @@ bindHold($('btnSkill'), () => { if (G.state === 'play') inp.skillQ = true; });
    · BGM: 탐험(잔잔한 중세풍 류트) ↔ 전투(활기찬 아르페지오+드럼)가 같은 템포로 돌아가며 크로스페이드
    · SFX: 물감 휘두르기(찰방), 색상별 타격음, 회피 성공 전용음 등                                   */
 const SFX = (() => {
-  let ac = null, master, sfxBus, expBus, cmbBus, noiseBuf, muted = false, timer = null;
+  let ac = null, master, sfxBus, expBus, cmbBus, bgmBus, noiseBuf, muted = false, timer = null;
+  const vol = { master: 1, bgm: 1, sfx: 1 };            // 설정 화면의 볼륨 (0~1)
   let step = 0, nextT = 0, combat = false;
   const BPM = 108, STEP = 60 / BPM / 4;                  // 16분음표 길이
   const mf = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -420,14 +554,22 @@ const SFX = (() => {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     try { ac = new AC(); } catch (e) { ac = null; return; }
-    master = ac.createGain(); master.gain.value = muted ? 0 : 0.55; master.connect(ac.destination);
-    sfxBus = ac.createGain(); sfxBus.gain.value = 0.9; sfxBus.connect(master);
-    expBus = ac.createGain(); expBus.gain.value = 0.5; expBus.connect(master);
-    cmbBus = ac.createGain(); cmbBus.gain.value = 0.0; cmbBus.connect(master);
+    master = ac.createGain(); master.gain.value = muted ? 0 : 0.55 * vol.master; master.connect(ac.destination);
+    sfxBus = ac.createGain(); sfxBus.gain.value = 0.9 * vol.sfx; sfxBus.connect(master);
+    bgmBus = ac.createGain(); bgmBus.gain.value = vol.bgm; bgmBus.connect(master);
+    expBus = ac.createGain(); expBus.gain.value = 0.5; expBus.connect(bgmBus);
+    cmbBus = ac.createGain(); cmbBus.gain.value = 0.0; cmbBus.connect(bgmBus);
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     nextT = ac.currentTime + 0.12; step = 0;
     timer = setInterval(sched, 30);
+  }
+
+  function applyVol() {
+    if (!ac) return; const t = ac.currentTime;
+    master.gain.setTargetAtTime(muted ? 0 : 0.55 * vol.master, t, 0.03);
+    bgmBus.gain.setTargetAtTime(vol.bgm, t, 0.03);
+    sfxBus.gain.setTargetAtTime(0.9 * vol.sfx, t, 0.03);
   }
 
   function tone(type, f0, f1, dur, vol, dest, at, att = 0.004) {
@@ -471,7 +613,9 @@ const SFX = (() => {
   return {
     init, resume() { if (ac && ac.state === 'suspended') ac.resume(); },
     get muted() { return muted; },
-    setMuted(v) { muted = v; if (master) master.gain.setTargetAtTime(v ? 0 : 0.55, ac.currentTime, 0.03); },
+    setMuted(v) { muted = v; applyVol(); },
+    setVolume(k, v) { vol[k] = Math.max(0, Math.min(1, v)); applyVol(); },
+    getVolume() { return { set: { ...vol }, node: ac ? { master: master.gain.value, bgm: bgmBus.gain.value, sfx: sfxBus.gain.value } : null }; },
     setCombat(on) {
       if (!ac || on === combat) return; combat = on;
       cmbBus.gain.setTargetAtTime(on ? 0.9 : 0, ac.currentTime, 0.3);
@@ -813,6 +957,25 @@ function saveMeta() { try { localStorage.setItem('echoes.unlock', JSON.stringify
 const isUnlocked = k => k === 'red' || k === 'yellow' || k === 'blue' || G.ch === 0 || !!META.unlocked[k];
 const unlockedKeys = () => PAINT_KEYS.filter(isUnlocked);
 function unlockPaints() { META.unlocked.green = true; META.unlocked.purple = true; saveMeta(); }
+// 몬스터 도감: 화면에 처음 등장한 몬스터가 기록됩니다 (보스는 전투가 시작될 때). 브라우저에 저장.
+const CODEX = { seen: {} };
+try { Object.assign(CODEX.seen, JSON.parse(localStorage.getItem('echoes.codex') || '{}')); } catch (e) { /* 저장소를 쓸 수 없는 환경 */ }
+function codexSee(type) {
+  if (CODEX.seen[type] || !CODEX_MON[type]) return;
+  CODEX.seen[type] = true;
+  try { localStorage.setItem('echoes.codex', JSON.stringify(CODEX.seen)); } catch (e) { /* 무시 */ }
+  toast(CODEX_MON[type].name, '도감 등록', CODEX_MON[type].col);
+}
+let cdxT = 0;
+function codexTick(dt) {
+  cdxT -= dt; if (cdxT > 0) return; cdxT = 0.2;
+  for (const e of G.enemies) {
+    if (e.dead || e.type === 'dummy' || CODEX.seen[e.type]) continue;
+    if (e.type === 'boss') { if (G.bossStarted) codexSee('boss'); continue; }
+    const sx = e.x - cam.x, sy = e.y - cam.y;
+    if (sx > -8 && sx < W + 8 && sy > -8 && sy < H + 8) codexSee(e.type);
+  }
+}
 const TRAIN = { log: [], total: 0, last: 0, hits: 0 };
 function trainReset() { TRAIN.log.length = 0; TRAIN.total = 0; TRAIN.last = 0; TRAIN.hits = 0; }
 function trainLog(d, dot) { TRAIN.log.push([G.time, d]); TRAIN.total += d; TRAIN.last = d; if (!dot) TRAIN.hits++; }
@@ -1320,7 +1483,7 @@ function slimeAI(e, dt, ux, uy, d, sf) {
       break;
     case 'lunge': {
       const sp = 210 * (e.slowT > 0 ? 0.6 : 1), blk = moveEntity(e, e.ldx * sp * dt, e.ldy * sp * dt);
-      if (!e.hitDone && d < e.r + P.r) { if (hitPlayer(14, e.x, e.y, e)) e.hitDone = true; }
+      if (!e.hitDone && d < e.r + P.r) { if (hitPlayer(EDEF.slime.dmg, e.x, e.y, e)) e.hitDone = true; }
       if (blk || e.st >= 0.28) setSt(e, 'recover');
       break; }
     case 'recover': e.vuln = true; if (e.st >= 0.9) { setSt(e, 'chase'); e.cd = 0.5; } break;
@@ -1341,7 +1504,7 @@ function houndAI(e, dt, ux, uy, d, sf) {
       break;
     case 'lunge': {
       const sp = 265 * (e.slowT > 0 ? 0.6 : 1), blk = moveEntity(e, e.ldx * sp * dt, e.ldy * sp * dt);
-      if (!e.hitDone && d < e.r + P.r) { if (hitPlayer(12, e.x, e.y, e)) e.hitDone = true; }
+      if (!e.hitDone && d < e.r + P.r) { if (hitPlayer(EDEF.hound.dmg, e.x, e.y, e)) e.hitDone = true; }
       if (blk || e.st >= 0.25) setSt(e, 'recover');
       break; }
     case 'recover': e.vuln = true; if (e.st >= 0.6) { setSt(e, 'chase'); e.cd = rnd(0.7, 1.5); e.orbit = Math.random() < 0.5 ? 1 : -1; } break;
@@ -1359,7 +1522,7 @@ function spitterAI(e, dt, ux, uy, d, sf) {
       if (!e.lockd) { e.ldx = ux; e.ldy = uy; if (e.st > 0.55) e.lockd = true; }
       if (e.st >= 0.8) {
         const a = Math.atan2(e.ldy, e.ldx), n = e.volley, col = G.ch === 2 ? '#c6a4ff' : '#ff9ad5';
-        for (let i = 0; i < n; i++) shoot(e.x, e.y - 2, a + (n > 1 ? (i - (n - 1) / 2) * 0.38 : 0), n > 1 ? 92 : 105, 10, 3, col);
+        for (let i = 0; i < n; i++) shoot(e.x, e.y - 2, a + (n > 1 ? (i - (n - 1) / 2) * 0.38 : 0), n > 1 ? 92 : 105, EDEF.spitter.dmg, 3, col);
         SFX.spit(); setSt(e, 'recover');
       }
       break;
@@ -1427,8 +1590,8 @@ function bossAI(e, dt) {
       break; }
     case 'slam': {
       e.glow = Math.min(1, e.st / 0.8); e.hammer = Math.min(1, e.st / 0.5);
-      if (!e.did) { e.did = 1; addTele({ x: P.x, y: P.y, r: p2 ? 46 : 42, dur: 1.0, lock: 0.55, follow: true, dmg: 28, big: true }); }
-      if (p2 && e.n === 0 && e.st > 0.45) { e.n = 1; addTele({ x: P.x, y: P.y, r: 46, dur: 0.85, lock: 0.3, follow: true, dmg: 28, big: true }); }
+      if (!e.did) { e.did = 1; addTele({ x: P.x, y: P.y, r: p2 ? 46 : 42, dur: 1.0, lock: 0.55, follow: true, dmg: EDEF.boss.dmg.slam, big: true }); }
+      if (p2 && e.n === 0 && e.st > 0.45) { e.n = 1; addTele({ x: P.x, y: P.y, r: 46, dur: 0.85, lock: 0.3, follow: true, dmg: EDEF.boss.dmg.slam, big: true }); }
       if (e.st > (p2 ? 1.4 : 1.12)) bossStagger(e, p2 ? 0.9 : 1.4);
       break; }
     case 'ring': {
@@ -1445,7 +1608,7 @@ function bossAI(e, dt) {
       break; }
     case 'rain': {
       e.glow = Math.min(1, e.st / 0.6); e.hammer = Math.min(1, e.st / 0.6);
-      if (!e.did) { e.did = 1; for (let i = 0; i < 7; i++) { const [x, y] = telePos(true); addTele({ x, y, r: 22, dur: 0.9 + i * 0.17, dmg: 20 }); } }
+      if (!e.did) { e.did = 1; for (let i = 0; i < 7; i++) { const [x, y] = telePos(true); addTele({ x, y, r: 22, dur: 0.9 + i * 0.17, dmg: EDEF.boss.dmg.rain }); } }
       if (e.st > 2.3) bossStagger(e, 0.9);
       break; }
     case 'summon': {
@@ -1466,7 +1629,7 @@ function bossAI(e, dt) {
   // 몸통 충돌: 플레이어를 밀어내고 접촉 피해
   if (!P.dead && e.state !== 'dying' && d < e.r + P.r) {
     const o = e.r + P.r - d; moveEntity(P, -ux * o, -uy * o);
-    if (e.contactCd <= 0 && !e.untargetable) { if (hitPlayer(10, e.x, e.y, e)) e.contactCd = 1; }
+    if (e.contactCd <= 0 && !e.untargetable) { if (hitPlayer(EDEF.boss.dmg.contact, e.x, e.y, e)) e.contactCd = 1; }
   }
 }
 function bossChoose(e) {
@@ -1475,10 +1638,10 @@ function bossChoose(e) {
   if (e.phase === 2 && !e.summoned && e.hp < e.maxHp * 0.3) { p = 'summon'; e.summoned = true; }
   e.lastPat = p; setSt(e, p);
 }
-function fireRing(e) { G.rings.push({ x: e.x, y: e.y, rad: 14, speed: 100, thick: 7, dmg: 16, max: 300, hit: false, dodgeId: -1 }); SFX.slam(); G.shake = Math.max(G.shake, 5); burst(e.x, e.y + 10, 14, ['#ffb86b', '#8a8594'], 110, 0.5, 3, 0); }
+function fireRing(e) { G.rings.push({ x: e.x, y: e.y, rad: 14, speed: 100, thick: 7, dmg: EDEF.boss.dmg.ring, max: 300, hit: false, dodgeId: -1 }); SFX.slam(); G.shake = Math.max(G.shake, 5); burst(e.x, e.y + 10, 14, ['#ffb86b', '#8a8594'], 110, 0.5, 3, 0); }
 function fireBurst(e) {
   const n = e.phase === 2 ? 14 : 12, off = (e.n % 2) * (TAU / n / 2) + e.spin; e.spin += 0.23;
-  for (let i = 0; i < n; i++) shoot(e.x, e.y, off + i * TAU / n, 86, 11, 3.5, '#ffb86b');
+  for (let i = 0; i < n; i++) shoot(e.x, e.y, off + i * TAU / n, 86, EDEF.boss.dmg.burst, 3.5, '#ffb86b');
   SFX.spit(); G.shake = Math.max(G.shake, 2);
 }
 function bossPhase2(e) {
@@ -1569,7 +1732,7 @@ function update(dt) {
     return;
   }
   G.stats.time += dt;
-  updatePlayer(dt); updateEnemies(dt);
+  updatePlayer(dt); updateEnemies(dt); codexTick(dt);
   updateBullets(dt); updatePShots(dt); updateTele(dt); updateRings(dt); updateGems(dt); updateGates(dt); updatePortal(dt);
   updateTutorial(); updateTriggers();
   updateParts(dt); updateTexts(dt); updateFx(dt);
@@ -2017,7 +2180,7 @@ function render() {
 const hudEl = $('hud'), hpFill = $('hpFill'), hpTxt = $('hpTxt'), enFill = $('enFill'), enTxt = $('enTxt'), enBar = $('enBar');
 const slotsEl = $('slots'), hintEl = $('hint'), bossBarEl = $('bossBar'), bossFill = $('bossFill'), bossPhase = $('bossPhase');
 const bannerEl = $('banner'), fpsEl = $('fps');
-const screens = { title: $('sTitle'), pause: $('sPause'), over: $('sOver'), clear: $('sClear') };
+const screens = { title: $('sTitle'), pause: $('sPause'), over: $('sOver'), clear: $('sClear'), settings: $('sSettings'), codex: $('sCodex') };
 const slotEls = {};
 PAINT_KEYS.forEach((k, i) => {
   const d = document.createElement('div'); d.className = 'slot'; d.style.setProperty('--c', PAINTS[k].col);
@@ -2133,6 +2296,163 @@ function chapterClear() {
 function winGame() { if (G.state !== 'play') return; showClear('CHAPTER 3 CLEAR', '잿빛이 걷히고, 마을에 색이 돌아왔습니다.', true); }
 function nextChapter() { if (G.state !== 'clear' || G.ch >= 3) return; enterChapter(G.ch + 1, false); }
 
+/* ── 설정 · 도감 창 (타이틀·일시정지 화면에서 엽니다) ── */
+const toastEl = $('toast');
+function toast(title, label, col) {                 // 화면 오른쪽 위에 잠깐 뜨는 알림
+  toastEl.innerHTML = `<small>${label || ''}</small>${title}`; toastEl.style.setProperty('--tc', col || '#f7cb38');
+  toastEl.classList.remove('show'); void toastEl.offsetWidth; toastEl.classList.add('show');
+}
+let modal = null, modalFrom = 'title', modalOpener = null;   // modal: null | 'settings' | 'codex'
+function openModal(name) {
+  if (modal || (G.state !== 'title' && G.state !== 'pause')) return;
+  if (name === 'codex' && G.state !== 'title') return;      // 도감은 타이틀 화면에서만
+  modalFrom = G.state; modal = name; modalOpener = document.activeElement;
+  document.body.classList.toggle('cdx', name === 'codex');
+  showScreen(name); SFX.init(); SFX.ui();
+  if (name === 'codex') { renderCodex(); const it = cdxList.querySelector('.cdxItem.on'); if (it) it.focus({ preventScroll: true }); }
+  else { refreshSliders(); const s = sliderEls[0]; if (s) s.focus({ preventScroll: true }); }
+}
+function closeModal() {                                     // 열었던 화면(타이틀/일시정지)으로 돌아감 — 게임이 재개되지는 않음
+  if (!modal) return;
+  modal = null; document.body.classList.remove('cdx'); showScreen(modalFrom); SFX.ui();
+  if (modalOpener && modalOpener.isConnected && modalOpener !== document.body) { try { modalOpener.focus({ preventScroll: true }); } catch (e) { /* 무시 */ } }
+  modalOpener = null;
+}
+
+/* 설정: 마스터 / BGM / 효과음 (0~100, 브라우저에 저장) */
+const SET = { master: 100, bgm: 100, sfx: 100 };
+try { const s = JSON.parse(localStorage.getItem('echoes.settings') || '{}'); for (const k in SET) if (typeof s[k] === 'number') SET[k] = clamp(Math.round(s[k]), 0, 100); } catch (e) { /* 저장소를 쓸 수 없는 환경 */ }
+const volCurve = v => (v / 100) * (v / 100);                // 슬라이더 값 → 실제 음량 (제곱 곡선: 귀로 듣기에 자연스러움)
+function applySettings() { for (const k in SET) SFX.setVolume(k, volCurve(SET[k])); }
+function saveSettings() { try { localStorage.setItem('echoes.settings', JSON.stringify(SET)); } catch (e) { /* 무시 */ } }
+const sliderEls = [...document.querySelectorAll('#sSettings .slider')];
+function paintSlider(el) { const v = SET[el.dataset.k]; el.style.setProperty('--v', v / 100); el.setAttribute('aria-valuenow', v); el.parentElement.querySelector('output').textContent = v; }
+function refreshSliders() { sliderEls.forEach(paintSlider); }
+let pvT = 0;
+function previewVol(k) {                                    // 조절 직후 들려주는 확인음 (BGM은 이미 흐르고 있으니 생략)
+  if (k === 'bgm') return; const t = performance.now(); if (t - pvT < 90) return; pvT = t;
+  SFX.init(); if (k === 'sfx') SFX.hit('blue'); else SFX.ui();
+}
+sliderEls.forEach(el => {
+  const k = el.dataset.k, knob = el.querySelector('b'); let drag = null;
+  const fromX = x => { const r = el.getBoundingClientRect(), kw = knob.offsetWidth; return clamp(Math.round((x - r.left - kw / 2) / Math.max(1, r.width - kw) * 100), 0, 100); };
+  const set = v => { if (v === SET[k]) return; SET[k] = v; paintSlider(el); applySettings(); saveSettings(); };
+  el.addEventListener('pointerdown', e => { drag = e.pointerId; try { el.setPointerCapture(drag); } catch (err) { /* 무시 */ } SFX.init(); set(fromX(e.clientX)); el.focus({ preventScroll: true }); e.preventDefault(); });
+  el.addEventListener('pointermove', e => { if (e.pointerId === drag) set(fromX(e.clientX)); });
+  const end = e => { if (e.pointerId !== drag) return; drag = null; previewVol(k); };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('keydown', e => {
+    const st = e.shiftKey ? 10 : 5; let v = SET[k];
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowDown') v -= st; else if (e.code === 'ArrowRight' || e.code === 'ArrowUp') v += st;
+    else if (e.code === 'PageDown') v -= 10; else if (e.code === 'PageUp') v += 10; else if (e.code === 'Home') v = 0; else if (e.code === 'End') v = 100; else return;
+    e.preventDefault(); set(clamp(v, 0, 100)); previewVol(k);
+  });
+});
+applySettings(); refreshSliders();
+
+/* 도감 텍스트 — 수치(공격력·속도·사거리·스킬 값)는 PAINTS에서 실시간으로 읽어오므로, 밸런스를 바꾸면 도감도 같이 바뀝니다 */
+const CODEX_PAINT = {
+  red: { role: '근접 · 강타', desc: '가장 묵직한 한 방을 가진 물감. 가까이 붙어 앞쪽 부채꼴을 크게 쓸어냅니다.',
+    sp: p => `특수 효과 없이 순수한 화력에 집중한 물감입니다. 넉백이 강해서(${p.kb}) 맞은 적이 멀리 밀려나요.`,
+    sk: s => `주변 ${s.arc}°의 넓은 범위를 크게 휘둘러 ${s.dmg} 피해를 주고, 맞은 적을 ${s.burn.t}초 동안 태웁니다 (초당 ${s.burn.dps}, 총 ${s.burn.dps * s.burn.t}).` },
+  yellow: { role: '범위 · 둔화', desc: '앞쪽 원형 범위를 후려쳐 여러 적을 한꺼번에 둔하게 만드는 물감.',
+    sp: p => `슬로우: 맞은 적의 이동 속도가 50% 느려집니다 (${p.slow}초 지속). 슬로우 중에는 돌진 공격 속도도 40% 줄어요.`,
+    sk: s => `체력 ${s.heal}을 회복하고, ${s.hasteT}초 동안 이동 속도가 ${Math.round((s.haste - 1) * 100)}% 빨라집니다.` },
+  blue: { role: '연타 · 고속', desc: '한 방은 약하지만 쉴 새 없이 이어지는 연타. 에너지 효율이 가장 좋아요.',
+    sp: p => `연속 타격: 한 번 맞히면 곧바로 이어서 자동으로 추가 타격이 나갑니다 (최대 ${p.chain}연타). 추가 타격에는 에너지가 들지 않고, 빗나가면 연타가 끊겨요.`,
+    sk: s => `맞으면 근처의 다른 적에게 튕기는 물 탄환을 쏩니다. 최대 ${s.bounces}번 튕기며(최대 ${s.bounces + 1}명) 각 ${s.dmg} 피해, 튕김 거리 ${s.bounceRange}px.` },
+  green: { role: '원거리 · 단일', desc: '덩굴을 뻗어 멀리 있는 적 하나를 정확히 때리는 물감.',
+    sp: p => `덩굴: 사거리 안에서 가장 가까운(시야가 트인) 적 1체를 자동으로 조준해 때립니다. 대상이 없으면 에너지를 쓰지 않아요. 넉백이 매우 강합니다 (${p.kb}).`,
+    sk: s => `최대 체력의 ${Math.round(s.shieldPct * 100)}%(${Math.max(1, Math.round(CFG.player.hp * s.shieldPct))})만큼 피해를 대신 받아 주는 보호막을 ${s.dur}초 동안 두릅니다.` },
+  purple: { role: '관통 · 독', desc: '독을 묻힌 붓으로 앞쪽 직선을 꿰뚫는 물감.',
+    sp: p => `독: 맞은 적이 ${p.poison.t}초 동안 매초 ${p.poison.dps}의 지속 피해를 입습니다 (총 ${p.poison.dps * p.poison.t}). 직선 위에 늘어선 적을 한 번에 찌를 수 있어요.`,
+    sk: s => `독 구슬을 던지면 짧게 날아가다 세 갈래로 갈라집니다. 갈래마다 ${s.dmg} 피해 + ${s.poison.t}초간 매초 ${s.poison.dps} 독.` },
+};
+const MON_KEYS = ['slime', 'hound', 'spitter', 'boss'];
+const PV = { slime: { w: 24, h: 24, z: 4, x: 12, y: 10 }, hound: { w: 32, h: 32, z: 3, x: 14, y: 21 }, spitter: { w: 32, h: 32, z: 3, x: 16, y: 19 }, boss: { w: 56, h: 62, z: 2, x: 28, y: 34 } };   // 몬스터 미리보기: 원본 영역 · 확대율 · 중심
+const owned = k => k === 'red' || k === 'yellow' || k === 'blue' || !!META.unlocked[k];     // 획득한 물감 (훈련장 임시 해금은 제외)
+let cdxTab = 'paint'; const cdxSel = { paint: 'red', mon: 'slime' };
+const cdxList = $('cdxList'), cdxDetail = $('cdxDetail');
+
+function monDmg(k, key) { const d = EDEF[k].dmg; return key === 'dmg' ? d : d[key]; }
+function paintDetail(k) {
+  if (!owned(k)) return `<div class="cdxEmpty"><div class="q">?</div><b>아직 획득하지 못한 물감</b><p>챕터 3의 보스 「잿빛 파수꾼」을 쓰러뜨리면 얻을 수 있어요.</p></div>`;
+  const pa = PAINTS[k], inf = CODEX_PAINT[k], sk = pa.skill, rate = 1 / pa.cd;
+  const shape = { fan: `부채꼴 ${pa.arc}°`, circle: '앞쪽 원형 범위', line: `직선 (폭 ${pa.width}px)`, vine: '자동 조준 · 가장 가까운 적 1체' }[pa.shape];
+  const dmg = k === 'blue' ? `${pa.dmg} × 최대 ${pa.chain}연타 <small>(모두 명중 시 ${pa.dmg * pa.chain})</small>` : `${pa.dmg}${pa.poison ? ' <small>+ 독 지속 피해</small>' : ''}`;
+  const en = k === 'blue' ? `공격 1회 ${pa.cost} <small>· 연타 추가분은 무소모 · 명중 시 +${pa.hit} 회복</small>` : `공격 1회 ${pa.cost} <small>· 명중 시 +${pa.hit} 회복</small>`;
+  return `<div class="cdxGrid" style="--c:${pa.col}">
+    <div class="cdxCol">
+      <div class="cdxHero"><div class="swatch"><b>${PAINT_KEYS.indexOf(k) + 1}</b></div><div><h3>${pa.ko}</h3><div class="sub">${inf.role}</div><p>${inf.desc}</p></div></div>
+      <dl class="kv">
+        <dt>공격력</dt><dd>${dmg}</dd>
+        <dt>공격속도</dt><dd>초당 ${rate.toFixed(1)}회 <small>(${pa.cd.toFixed(2)}초에 1회)</small></dd>
+        <dt>사정거리</dt><dd>${Math.round(pa.range)}px <small>(약 ${(pa.range / T).toFixed(1)}칸)<br>${shape}</small></dd>
+        <dt>에너지</dt><dd>${en}</dd>
+      </dl>
+    </div>
+    <div class="cdxCol">
+      <div class="box"><h4>특수능력</h4><p>${inf.sp(pa)}</p></div>
+      <div class="box"><h4><em>E</em>${sk.ko}<small>${sk.tag}</small></h4><p>${inf.sk(sk)}</p><div class="meta">에너지 ${sk.cost} 소모 · 재사용 대기 ${sk.cd}초 · E 키 / 우클릭 / E 버튼</div></div>
+      <p class="cdxNote">※ 기본 수치입니다. 보석 1단계마다 공격력 +${Math.round(CFG.gem.dmgPerLv * 100)}%, 사거리 +${CFG.gem.rangePerLv} (최대 Lv${CFG.gem.maxLv}).</p>
+    </div>
+  </div>`;
+}
+function monDetail(k) {
+  if (!CODEX.seen[k]) return `<div class="cdxEmpty"><div class="q">?</div><b>아직 발견하지 못한 몬스터</b><p>${k === 'boss' ? '보스는 전투가 시작되면 도감에 등록됩니다.' : '게임 중 화면에서 마주치면 도감에 등록돼요.'}</p></div>`;
+  const m = CODEX_MON[k], e = EDEF[k], pv = PV[k];
+  const ds = m.patterns.filter(p => p[1]).map(p => monDmg(k, p[1])), lo = Math.min(...ds), hi = Math.max(...ds), atk = lo === hi ? String(lo) : lo + '~' + hi;
+  const pats = m.patterns.map(([n, key, t]) => `<li><b>${n}</b>${key ? `<em>피해 ${monDmg(k, key)}</em>` : '<em class="nd">소환</em>'}<span>${t}</span></li>`).join('');
+  return `<div class="cdxGrid" style="--c:${m.col}">
+    <div class="cdxCol">
+      <div class="cdxHero"><canvas class="pv" id="cdxPv" width="${pv.w * pv.z}" height="${pv.h * pv.z}" style="width:${pv.w * pv.z * 0.125}cqw;height:${pv.h * pv.z * 0.125}cqw"></canvas>
+        <div><h3>${m.name}</h3>${m.en ? `<div class="sub en">${m.en} · BOSS</div>` : ''}<p>${m.desc}</p></div></div>
+      <dl class="kv"><dt>체력</dt><dd>${e.hp}</dd><dt>공격력</dt><dd>${atk}${lo === hi ? '' : ' <small>(패턴에 따라 다름)</small>'}</dd></dl>
+    </div>
+    <div class="cdxCol">
+      <h5 class="cdxSec">공격 방식</h5><ul class="patList">${pats}</ul>
+      ${m.tips ? `<h5 class="cdxSec">전투 팁</h5><ul class="tipList">${m.tips.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
+    </div>
+  </div>`;
+}
+function drawMonPreview(k) {      // 게임에서 쓰는 그리기 함수로 메인 캔버스 한 귀퉁이에 그린 뒤 미리보기 캔버스로 옮김 (바로 다음에 render()가 화면을 다시 그림)
+  const cv = $('cdxPv'), pv = PV[k]; if (!cv) return;
+  const c2 = cv.getContext('2d'); c2.imageSmoothingEnabled = false;
+  const ox = OX, oy = OY; OX = 0; OY = 0;
+  ctx.globalAlpha = 1; ctx.fillStyle = '#1a1626'; ctx.fillRect(0, 0, pv.w, pv.h);
+  drawEnemy({ type: k, x: pv.x, y: pv.y, r: EDEF[k].r, face: 1, flash: 0, state: 'idle', st: 0, anim: 0.4, slowT: 0, burnT: 0, poisT: 0, hp: 1, maxHp: 1, phase: 1, glow: 0, hammer: 0, wob: 0, dead: false });
+  c2.drawImage(canvas, 0, 0, pv.w, pv.h, 0, 0, cv.width, cv.height);
+  OX = ox; OY = oy; render();
+}
+function renderCodexDetail() {
+  cdxDetail.innerHTML = cdxTab === 'paint' ? paintDetail(cdxSel.paint) : monDetail(cdxSel.mon); cdxDetail.scrollTop = 0;
+  if (cdxTab === 'mon' && CODEX.seen[cdxSel.mon]) drawMonPreview(cdxSel.mon);
+}
+function selectCodex(k) {
+  cdxSel[cdxTab] = k; cdxList.querySelectorAll('.cdxItem').forEach(b => b.classList.toggle('on', b.dataset.k === k)); renderCodexDetail();
+}
+function renderCodex() {
+  document.querySelectorAll('#sCodex .tab').forEach(t => { const on = t.dataset.tab === cdxTab; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
+  const keys = cdxTab === 'paint' ? PAINT_KEYS : MON_KEYS, known = k => cdxTab === 'paint' ? owned(k) : !!CODEX.seen[k];
+  $('cdxCount').textContent = '수집 ' + keys.filter(known).length + ' / ' + keys.length;
+  cdxList.innerHTML = '';
+  keys.forEach((k, i) => {
+    const ok = known(k), b = document.createElement('button'); b.type = 'button'; b.dataset.k = k;
+    b.className = 'cdxItem' + (ok ? '' : ' lock') + (k === cdxSel[cdxTab] ? ' on' : '');
+    b.style.setProperty('--c', ok ? (cdxTab === 'paint' ? PAINTS[k].col : CODEX_MON[k].col) : '#4a4560');
+    b.innerHTML = `<span class="no">${String(i + 1).padStart(2, '0')}</span><i class="sw"></i><span class="nm">${ok ? (cdxTab === 'paint' ? PAINTS[k].ko : CODEX_MON[k].name) : '???'}</span>`;
+    b.addEventListener('click', () => { SFX.ui(); selectCodex(k); });
+    cdxList.appendChild(b);
+  });
+  renderCodexDetail();
+}
+cdxList.addEventListener('keydown', e => {                  // 목록에서 ↑↓로 이동
+  if (e.code !== 'ArrowUp' && e.code !== 'ArrowDown') return;
+  const items = [...cdxList.querySelectorAll('.cdxItem')], i = items.findIndex(b => b === document.activeElement); if (i < 0) return;
+  const n = clamp(i + (e.code === 'ArrowDown' ? 1 : -1), 0, items.length - 1); e.preventDefault();
+  if (n !== i) { items[n].focus({ preventScroll: false }); selectCodex(items[n].dataset.k); SFX.ui(); }
+});
+
 /* ── 버튼 ── */
 let fpsOn = true;
 function toggleMute() { SFX.init(); SFX.setMuted(!SFX.muted); $('btnMute').textContent = SFX.muted ? '×' : '♪'; }
@@ -2145,6 +2465,12 @@ $('mTrain').addEventListener('click', () => startGame(0));
 document.querySelectorAll('[data-ch]').forEach(b => b.addEventListener('click', () => startGame(+b.dataset.ch)));
 $('pResume').addEventListener('click', () => pauseGame(false));
 $('pTitle').addEventListener('click', toTitle);
+$('mCodex').addEventListener('click', () => openModal('codex'));
+$('mSet').addEventListener('click', () => openModal('settings'));
+$('pSet').addEventListener('click', () => openModal('settings'));
+$('cdxClose').addEventListener('click', closeModal);
+$('setClose').addEventListener('click', closeModal);
+document.querySelectorAll('#sCodex .tab').forEach(t => t.addEventListener('click', () => { cdxTab = t.dataset.tab; SFX.ui(); renderCodex(); }));
 $('oRetry').addEventListener('click', retry);
 $('oTitle').addEventListener('click', toTitle);
 $('cNext').addEventListener('click', nextChapter);
@@ -2195,7 +2521,7 @@ loadChapter(1, true); G.state = 'title'; hudEl.hidden = true; showScreen('title'
 requestAnimationFrame(frame);
 
 // 디버그/테스트용 훅 (콘솔에서 __echoes 로 접근)
-window.__echoes = { G, P, RUN, inp, keys, cam, updateCamera, PAINTS, CFG, loadChapter, enterChapter, update, render, startGame, hitPlayer, hitEnemy, killEnemy, mkEnemy, startSwing, useSkill, TRAIN, trainReset, META, isUnlocked, unlockAll: unlockPaints, fps: () => fps, tileAt, lineClear, TL, SOLID, THEMES, openGate, gateById };
+window.__echoes = { G, P, RUN, inp, keys, cam, updateCamera, PAINTS, CFG, loadChapter, enterChapter, update, render, startGame, hitPlayer, hitEnemy, killEnemy, mkEnemy, startSwing, useSkill, TRAIN, trainReset, META, isUnlocked, unlockAll: unlockPaints, fps: () => fps, tileAt, lineClear, TL, SOLID, THEMES, openGate, gateById, SFX, SET, CODEX, CODEX_MON, EDEF, openModal, closeModal, renderCodex, codexSee, toast, get modal() { return modal; } };
 
 })();
 </script>
